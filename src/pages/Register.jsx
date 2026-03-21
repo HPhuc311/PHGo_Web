@@ -50,7 +50,7 @@ const Register = () => {
                 <Form.Item name="password" label="Password" rules={[{ required: true }]}>
                     <Input.Password />
                 </Form.Item>
-
+ 
                 <Button type="primary" htmlType="submit" block>
                     Register
                 </Button>

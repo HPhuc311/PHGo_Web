@@ -1,42 +1,96 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Card, Form, Input, Button, message } from 'antd'
+import { useAuth } from '../context/AuthContext'
+import { EditOutlined } from '@ant-design/icons'
 
 const Profile = () => {
     const [form] = Form.useForm()
+    const { user, updateProfile } = useAuth()
+
+    const [editing, setEditing] = useState(false)
     const [loading, setLoading] = useState(false)
 
-    const user = JSON.parse(localStorage.getItem('user'))
+    const [preview, setPreview] = useState(null)
+    const [file, setFile] = useState(null)
 
-    // ================= GET PROFILE =================
-    const fetchProfile = async () => {
+    const fileInputRef = useRef()
+
+    useEffect(() => {
+        if (!user) return
+
+        const fetchProfile = async () => {
+            try {
+                const res = await fetch('http://localhost:5000/api/user/profile', {
+                    headers: {
+                        Authorization: `Bearer ${user.token}`
+                    }
+                })
+
+                const data = await res.json()
+
+                form.setFieldsValue({
+                    name: data.name,
+                    email: data.email,
+                    phone: data.phone,
+                    address: data.address
+                })
+            } catch {
+                message.error('Failed to fetch user data')
+            }
+        }
+
+        fetchProfile()
+    }, [user])
+
+    if (!user) return <div>Please login</div>
+
+    const avatarUrl =
+        preview ||
+        (user.avatar?.startsWith('http')
+            ? user.avatar
+            : `http://localhost:5000/${user.avatar}`)
+
+    // Click avatar to open file picker
+    const handleAvatarClick = () => {
+        if (!editing) return
+        fileInputRef.current.click()
+    }
+
+    const handleSelectFile = (e) => {
+        const selected = e.target.files[0]
+        if (!selected) return
+
+        setFile(selected)
+        setPreview(URL.createObjectURL(selected))
+    }
+
+    const handleUploadAvatar = async () => {
+        if (!file) return message.warning('Please select an image first')
+
+        const formData = new FormData()
+        formData.append('avatar', file)
+
         try {
-            const res = await fetch('http://localhost:5000/api/user/profile', {
+            const res = await fetch('http://localhost:5000/api/user/avatar', {
+                method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${user.token}`
-                }
+                },
+                body: formData
             })
 
             const data = await res.json()
 
-            form.setFieldsValue({
-                name: data.name,
-                email: data.email,
-                phone: data.phone,
-                address: data.address
-            })
+            updateProfile({ avatar: data.avatar })
+            message.success('Avatar uploaded successfully')
 
-        } catch (err) {
-            console.error(err)
-            message.error('Không lấy được thông tin user')
+            setFile(null)
+            setPreview(null)
+        } catch {
+            message.error('Upload failed')
         }
     }
 
-    useEffect(() => {
-        fetchProfile()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    // ================= UPDATE PROFILE =================
     const handleUpdate = async (values) => {
         setLoading(true)
 
@@ -50,53 +104,109 @@ const Profile = () => {
                 body: JSON.stringify(values)
             })
 
-            if (!res.ok) throw new Error()
+            const data = await res.json()
+            updateProfile(data.user)
 
-            message.success('Cập nhật thành công 🎉')
-        } catch (err) {
-            console.log('err:', err)
-            message.error('Cập nhật thất bại ❌')
+            message.success('Profile updated successfully')
+            setEditing(false)
+        } catch {
+            message.error('Update failed')
         }
 
         setLoading(false)
     }
 
     return (
-        <div style={{ maxWidth: 600, margin: '40px auto' }}>
-            <Card title="My Profile">
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={handleUpdate}
-                >
-                    <Form.Item name="name" label="Name">
-                        <Input />
-                    </Form.Item>
+        <div style={{ display: 'flex', gap: 30, padding: 40 }}>
 
-                    <Form.Item name="email" label="Email">
-                        <Input disabled />
-                    </Form.Item>
+            {/* SIDEBAR */}
+            <div style={{ width: 250 }}>
+                <h2>Hello!</h2>
 
-                    <Form.Item name="phone" label="Phone">
-                        <Input />
-                    </Form.Item>
+                <div style={{ marginTop: 20, lineHeight: '40px' }}>
+                    <div>👤 My Account</div>
+                    <div>❤️ Favorite Cars</div>
+                    <div>🧾 My Trips</div>
+                    <div>🔒 Change Password</div>
+                </div>
+            </div>
 
-                    <Form.Item name="address" label="Address">
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item>
+            {/* MAIN */}
+            <div style={{ flex: 1 }}>
+                <Card
+                    title="Account Information"
+                    extra={
                         <Button
-                            type="primary"
-                            htmlType="submit"
-                            loading={loading}
-                            block
+                            icon={<EditOutlined />}
+                            onClick={() => setEditing(!editing)}
                         >
-                            Update Profile
+                            {editing ? 'Cancel' : 'Edit'}
                         </Button>
-                    </Form.Item>
-                </Form>
-            </Card>
+                    }
+                >
+
+                    {/* AVATAR */}
+                    <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                        <img
+                            src={avatarUrl}
+                            alt="avatar"
+                            onClick={handleAvatarClick}
+                            style={{
+                                width: 120,
+                                height: 120,
+                                borderRadius: '50%',
+                                cursor: editing ? 'pointer' : 'default'
+                            }}
+                        />
+
+                        {/* hidden input */}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            style={{ display: 'none' }}
+                            onChange={handleSelectFile}
+                        />
+
+                        {editing && file && (
+                            <div style={{ marginTop: 10 }}>
+                                <Button onClick={handleUploadAvatar}>
+                                    Upload Avatar
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* FORM */}
+                    <Form form={form} layout="vertical" onFinish={handleUpdate}>
+                        <Form.Item name="name" label="Full Name">
+                            <Input disabled={!editing} />
+                        </Form.Item>
+
+                        <Form.Item name="email" label="Email">
+                            <Input disabled />
+                        </Form.Item>
+
+                        <Form.Item name="phone" label="Phone Number">
+                            <Input disabled={!editing} />
+                        </Form.Item>
+
+                        <Form.Item name="address" label="Address">
+                            <Input disabled={!editing} />
+                        </Form.Item>
+
+                        {editing && (
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                loading={loading}
+                                block
+                            >
+                                Save Changes
+                            </Button>
+                        )}
+                    </Form>
+                </Card>
+            </div>
         </div>
     )
 }

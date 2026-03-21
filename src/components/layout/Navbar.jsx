@@ -96,9 +96,11 @@ const Navbar = () => {
                                 cursor: 'pointer',
                             }}
                         >
-                            <Avatar src={user.avatar}>
-                                {!user.avatar && user.name?.charAt(0)}
-                            </Avatar>
+                    
+                                <Avatar src={user.avatar?.startsWith('http')
+                                    ? user.avatar
+                                    : `http://localhost:5000/${user.avatar}`}>
+                                </Avatar>
                             <span>{user.name}</span>
                             <DownOutlined style={{ fontSize: '12px' }} />
                         </div>
