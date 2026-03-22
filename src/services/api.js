@@ -14,12 +14,9 @@ export const fetchWithAuth = async (url, options = {}) => {
         headers
     })
 
-    if (res.status === 401) {
-        console.error('Unauthorized - please login again')
-    }
+    const data = await res.json()
 
-    return res.json()
+    return data
 }
 
-// ✅ THÊM DÒNG NÀY
 export default fetchWithAuth

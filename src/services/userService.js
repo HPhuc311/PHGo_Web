@@ -1,4 +1,5 @@
 import axios from 'axios'
+import API from './api'
 
 const API_URL = 'http://localhost:5000/api/user'
 
@@ -24,3 +25,6 @@ export const updateProfile = async (data) => {
     })
     return res.data
 }
+
+export const getAllUsers = () =>
+    API('/api/user/all')
