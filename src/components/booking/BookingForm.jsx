@@ -1,16 +1,17 @@
 import { Form, Input, DatePicker, InputNumber, Select, Radio, Button } from 'antd'
 import dayjs from 'dayjs'
+import { useState } from 'react'
 
 const { RangePicker } = DatePicker
 
 const BookingForm = ({ onNext }) => {
     const [form] = Form.useForm()
+    const [serviceType, setServiceType] = useState('local')
 
     const handleSubmit = (values) => {
         onNext(values)
     }
 
-    // ❌ Disable ngày quá khứ
     const disabledDate = (current) => {
         return current && current < dayjs().startOf('day')
     }
@@ -18,26 +19,78 @@ const BookingForm = ({ onNext }) => {
     return (
         <Form layout="vertical" form={form} onFinish={handleSubmit}>
 
+            {/* ✅ SERVICE TYPE */}
             <Form.Item
-                label="Pickup Location"
-                name="pickup"
-                rules={[{ required: true, message: 'Please enter pickup location' }]}
+                label="Service Type"
+                name="service"
+                initialValue="local"
+                rules={[{ required: true }]}
             >
-                <Input placeholder="Enter pickup location" />
+                <Select onChange={(value) => setServiceType(value)}>
+                    <Select.Option value="local">Local Ride</Select.Option>
+                    <Select.Option value="airport">Airport Transfer</Select.Option>
+                    <Select.Option value="daily">Daily Hire</Select.Option>
+                </Select>
             </Form.Item>
 
-            <Form.Item
-                label="Destination"
-                name="destination"
-                rules={[{ required: true, message: 'Please enter destination' }]}
-            >
-                <Input placeholder="Enter destination" />
-            </Form.Item>
+            {/* ✅ LOCAL RIDE */}
+            {serviceType === 'local' && (
+                <>
+                    <Form.Item
+                        label="Pickup Location"
+                        name="pickup"
+                        rules={[{ required: true }]}
+                    >
+                        <Input placeholder="Enter pickup location" />
+                    </Form.Item>
 
+                    <Form.Item
+                        label="Destination"
+                        name="destination"
+                        rules={[{ required: true }]}
+                    >
+                        <Input placeholder="Enter destination" />
+                    </Form.Item>
+                </>
+            )}
+
+            {/* ✅ AIRPORT */}
+            {serviceType === 'airport' && (
+                <>
+                    <Form.Item
+                        label="Airport"
+                        name="pickup"
+                        rules={[{ required: true }]}
+                    >
+                        <Input placeholder="Enter airport (e.g. Tan Son Nhat)" />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Destination"
+                        name="destination"
+                        rules={[{ required: true }]}
+                    >
+                        <Input placeholder="Enter destination" />
+                    </Form.Item>
+                </>
+            )}
+
+            {/* ✅ DAILY HIRE */}
+            {serviceType === 'daily' && (
+                <Form.Item
+                    label="Pickup Address"
+                    name="pickup"
+                    rules={[{ required: true }]}
+                >
+                    <Input placeholder="Enter pickup address" />
+                </Form.Item>
+            )}
+
+            {/* DATE */}
             <Form.Item
                 label="Date & Time"
                 name="time"
-                rules={[{ required: true, message: 'Please select date and time' }]}
+                rules={[{ required: true }]}
             >
                 <RangePicker
                     showTime={{ format: 'HH:mm' }}
@@ -46,27 +99,28 @@ const BookingForm = ({ onNext }) => {
                 />
             </Form.Item>
 
+            {/* PASSENGERS */}
             <Form.Item
                 label="Passengers"
                 name="passengers"
-                rules={[{ required: true, message: 'Please enter passengers' }]}
+                rules={[{ required: true }]}
             >
                 <InputNumber min={1} max={7} style={{ width: '100%' }} />
             </Form.Item>
 
+            {/* CAR */}
             <Form.Item
                 label="Car Type"
                 name="carType"
                 dependencies={['passengers']}
                 rules={[
-                    { required: true, message: 'Please select car type' },
+                    { required: true },
                     ({ getFieldValue }) => ({
                         validator(_, value) {
                             const passengers = getFieldValue('passengers')
 
                             if (!passengers || !value) return Promise.resolve()
 
-                            // ❌ Nếu >=5 người mà chọn xe 4 chỗ → lỗi
                             if (passengers >= 5 && value === '4') {
                                 return Promise.reject(
                                     new Error('5-7 passengers must choose 7-seat car')
@@ -78,20 +132,13 @@ const BookingForm = ({ onNext }) => {
                     })
                 ]}
             >
-                <Select placeholder="Select car type">
+                <Select>
                     <Select.Option value="4">4 seats</Select.Option>
                     <Select.Option value="7">7 seats</Select.Option>
                 </Select>
             </Form.Item>
 
-            <Form.Item label="Service Type" name="service">
-                <Select placeholder="Select service">
-                    <Select.Option value="local">Local Ride</Select.Option>
-                    <Select.Option value="airport">Airport Transfer</Select.Option>
-                    <Select.Option value="daily">Daily Hire</Select.Option>
-                </Select>
-            </Form.Item>
-
+            {/* NOTIFICATION */}
             <Form.Item label="Notification" name="notification">
                 <Radio.Group>
                     <Radio value="email">Email</Radio>

@@ -80,7 +80,7 @@ const Navbar = () => {
                         </span>
 
                         <span
-                            style={{ cursor: 'pointer', color: '#2ecc71' }}
+                            style={{ cursor: 'pointer', color: '#406093' }}
                             onClick={() => navigate('/register')}
                         >
                             Register

@@ -21,9 +21,10 @@ const Booking = () => {
                 destination: bookingData.destination,
                 date: new Date().toLocaleDateString(),
                 passengers: bookingData.passengers,
-                price: price + ' VND'
+                price: price + ' VND',
+                // ✅ ADD
+                service: bookingData.service,
             }
-
             await createTrip(newTrip) // ✅ dùng API
 
             setPrice(price)

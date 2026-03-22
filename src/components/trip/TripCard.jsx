@@ -1,28 +1,72 @@
-import { Card, Button, Tag } from 'antd'
+import { Card, Button, Tag, Modal } from 'antd'
 import { cancelTrip } from '../../services/tripServices'
-
 
 const TripCard = ({ trip }) => {
 
-    const handleCancel = async () => {
-        try {
-            await cancelTrip(trip._id)
-            window.location.reload()
-        } catch (err) {
-            console.error(err)
+    const handleCancel = () => {
+        Modal.confirm({
+            title: 'Cancel Trip?',
+            content: 'Are you sure you want to cancel this trip?',
+            okText: 'Yes, Cancel',
+            cancelText: 'No',
+            onOk: async () => {
+                await cancelTrip(trip._id)
+                window.location.reload()
+            }
+        })
+    }
+
+    const getStatusTag = () => {
+        switch (trip.status) {
+            case 'pending':
+                return <Tag color="gold">Waiting</Tag>
+            case 'confirmed':
+                return <Tag color="green">Confirmed</Tag>
+            case 'cancelled':
+                return <Tag color="red">Cancelled</Tag>
+            default:
+                return <Tag>Unknown</Tag>
         }
     }
 
     return (
-        <Card variant="outlined" style={{ marginBottom: 10 }}>
+        <Card
+            variant="outlined"
+            style={{
+                marginBottom: 15,
+                borderRadius: 12,
+                border:
+                    trip.status === 'cancelled'
+                        ? '1px solid #ff4d4f'
+                        : trip.status === 'confirmed'
+                            ? '1px solid #52c41a'
+                            : '1px solid #faad14',
+                background:
+                    trip.status === 'cancelled'
+                        ? '#fff1f0'
+                        : '#fff'
+            }}
+        >
             <h3>{trip.car}</h3>
-            <Tag>{trip.status}</Tag>
 
-            <p>{trip.pickup} → {trip.destination}</p>
+            {getStatusTag()}
 
-            <Button danger onClick={handleCancel}>
-                Cancel
-            </Button>
+            <p><b>From:</b> {trip.pickup}</p>
+            {trip.destination && (
+                <p><b>To:</b> {trip.destination}</p>
+            )}
+
+            <p><b>Passengers:</b> {trip.passengers}</p>
+            <p><b>Price:</b> {trip.price}</p>
+            <p><b>Date:</b> {trip.date}</p>
+            <p><b>Service:</b> {trip.service}</p>
+
+            {/* ❌ Không cho cancel nếu đã huỷ */}
+            {trip.status !== 'cancelled' && (
+                <Button danger onClick={handleCancel}>
+                    Cancel Trip
+                </Button>
+            )}
         </Card>
     )
 }
