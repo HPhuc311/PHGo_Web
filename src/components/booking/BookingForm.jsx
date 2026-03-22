@@ -23,13 +23,13 @@ const BookingForm = ({ onNext }) => {
             <Form.Item
                 label="Service Type"
                 name="service"
-                initialValue="local"
+                initialValue="Local Ride"
                 rules={[{ required: true }]}
             >
                 <Select onChange={(value) => setServiceType(value)}>
-                    <Select.Option value="local">Local Ride</Select.Option>
-                    <Select.Option value="airport">Airport Transfer</Select.Option>
-                    <Select.Option value="daily">Daily Hire</Select.Option>
+                    <Select.Option value="Local Ride">Local Ride</Select.Option>
+                    <Select.Option value="Airport Transfer">Airport Transfer</Select.Option>
+                    <Select.Option value="Daily Hire">Daily Hire</Select.Option>
                 </Select>
             </Form.Item>
 
@@ -93,9 +93,14 @@ const BookingForm = ({ onNext }) => {
                 rules={[{ required: true }]}
             >
                 <RangePicker
-                    showTime={{ format: 'HH:mm' }}
                     style={{ width: '100%' }}
                     disabledDate={disabledDate}
+                    showTime={{
+                        format: 'HH:mm',
+                        minuteStep: 30, // ✅ bước 30 phút
+                        hideDisabledOptions: true // ✅ ẩn các phút không hợp lệ
+                    }}
+                    format="DD-MM-YYYY HH:mm"
                 />
             </Form.Item>
 
