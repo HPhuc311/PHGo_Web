@@ -1,9 +1,7 @@
 const BASE_URL = 'http://localhost:5000'
 
 export const fetchWithAuth = async (url, options = {}) => {
-    const user = JSON.parse(localStorage.getItem('user'))
-
-    const token = user?.token
+    const token = localStorage.getItem('token')
 
     const headers = {
         'Content-Type': 'application/json',
@@ -16,5 +14,12 @@ export const fetchWithAuth = async (url, options = {}) => {
         headers
     })
 
+    if (res.status === 401) {
+        console.error('Unauthorized - please login again')
+    }
+
     return res.json()
 }
+
+// ✅ THÊM DÒNG NÀY
+export default fetchWithAuth

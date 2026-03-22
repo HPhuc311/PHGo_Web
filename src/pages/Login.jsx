@@ -6,14 +6,18 @@ import { loginAPI } from '../services/authService'
 const Login = () => {
     const navigate = useNavigate()
     const { login } = useAuth()
-    // const location = useLocation()
-    // const from = location.state?.from?.pathname || '/'
 
     const handleLogin = async (values) => {
         try {
             const res = await loginAPI(values)
 
             if (res.token) {
+
+                // ✅ QUAN TRỌNG: LƯU TOKEN ĐÚNG
+                localStorage.setItem('user', JSON.stringify(res.user))
+                localStorage.setItem('token', res.token) // ❗ không stringify
+
+                // lưu vào context
                 login({
                     ...res.user,
                     token: res.token
@@ -24,20 +28,30 @@ const Login = () => {
             } else {
                 message.error(res.message)
             }
-        } catch {
+
+        } catch (err) {
+            console.error(err)
             message.error('Server error')
         }
     }
 
     return (
-        <Card title="Login" style={{ maxWidth: 400, margin: 'auto' }}>
+        <Card title="Login" style={{ maxWidth: 400, margin: 'auto' }} variant="outlined">
             <Form layout="vertical" onFinish={handleLogin}>
 
-                <Form.Item name="email" label="Email" rules={[{ required: true }]}>
+                <Form.Item
+                    name="email"
+                    label="Email"
+                    rules={[{ required: true, message: 'Please enter email' }]}
+                >
                     <Input />
                 </Form.Item>
 
-                <Form.Item name="password" label="Password" rules={[{ required: true }]}>
+                <Form.Item
+                    name="password"
+                    label="Password"
+                    rules={[{ required: true, message: 'Please enter password' }]}
+                >
                     <Input.Password />
                 </Form.Item>
 
