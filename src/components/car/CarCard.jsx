@@ -10,12 +10,11 @@ const CarCard = ({ car }) => {
             style={{ borderRadius: '16px' }}
             cover={
                 <img
-                    src={car.image}
+                    src={`http://localhost:5000${car.image}`}
                     alt={car.name}
-                    style={{ height: '180px', objectFit: 'cover' }}
                 />
             }
-            onClick={() => navigate(`/cars/${car.id}`)}
+            onClick={() => navigate(`/cars/${car._id}`)}
         >
             <div>
                 <h4>{car.name}</h4>
@@ -30,8 +29,8 @@ const CarCard = ({ car }) => {
                 </div>
 
                 <div style={{ marginTop: '8px' }}>
-                    {car.tags.map((tag, i) => (
-                        <Tag key={i}>{tag}</Tag>
+                    {car.tags?.map((tag, i) => (
+                        <Tag key={i}>{tag}</Tag> 
                     ))}
                 </div>
             </div>

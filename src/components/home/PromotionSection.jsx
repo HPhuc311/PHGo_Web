@@ -6,17 +6,17 @@ const { Title, Paragraph } = Typography
 const PromotionSection = () => {
     const promotions = [
         {
-            title: 'Săn sale lễ - Đặt sớm xe tốt',
+            title: 'Holiday Deals - Book Early for the Best Cars',
             image:
                 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2',
         },
         {
-            title: 'Chọn xe đúng gu - vi vu đúng mood',
+            title: 'Choose Your Style - Ride Your Mood',
             image:
                 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8',
         },
         {
-            title: 'Căn xe đúng lúc - giảm giá hấp dẫn',
+            title: 'Book at the Right Time - Enjoy Great Discounts',
             image:
                 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c',
         },
@@ -25,11 +25,11 @@ const PromotionSection = () => {
     return (
         <div style={{ marginTop: '5px', textAlign: 'center' }}>
 
-            <Title level={2}>Chương Trình Khuyến Mãi</Title>
-            <Paragraph>Nhận nhiều ưu đãi hấp dẫn từ Mioto</Paragraph>
+            <Title level={2}>Promotions</Title>
+            <Paragraph>Enjoy many attractive offers from Mioto</Paragraph>
 
             <div style={{ position: 'relative', marginTop: '30px' }}>
-                {/* List card */}
+                {/* Card list */}
                 <Row gutter={20}>
                     {promotions.map((item, index) => (
                         <Col span={8} key={index}>

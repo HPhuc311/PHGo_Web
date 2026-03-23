@@ -1,20 +1,29 @@
 import { useEffect, useState } from "react"
 import AdminUserTable from "../components/admin/AdminUserTable"
 import { getAllTrips, updateTripStatus } from "../services/tripServices"
+import { createCar, getCars, deleteCar, updateCar } from "../../src/services/carService"
+import { message, Modal, Select, Tabs } from "antd"
 
 const AdminDashboard = () => {
-    const [activeTab, setActiveTab] = useState("users")
     const [trips, setTrips] = useState([])
+    const [cars, setCars] = useState([])
+    const [editingCar, setEditingCar] = useState(null)
+    const [loading, setLoading] = useState(false)
 
+    const [form, setForm] = useState({
+        name: '',
+        brand: '',
+        location: '',
+        price: ''
+    })
+
+    const [image, setImage] = useState(null)
+
+    // ================= TRIPS =================
     const fetchTrips = async () => {
         const data = await getAllTrips()
         setTrips(data)
     }
-
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        fetchTrips()
-    }, [])
 
     const handleChangeStatus = async (id, status) => {
         await updateTripStatus(id, status)
@@ -23,17 +32,80 @@ const AdminDashboard = () => {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case "pending":
-                return "#facc15"
-            case "confirmed":
-                return "#22c55e"
-            case "completed":
-                return "#3b82f6"
-            case "cancelled":
-                return "#ef4444"
-            default:
-                return "#ccc"
+            case "pending": return "#facc15"
+            case "confirmed": return "#22c55e"
+            case "completed": return "#3b82f6"
+            case "cancelled": return "#ef4444"
+            default: return "#ccc"
         }
+    }
+
+    // ================= CARS =================
+    const fetchCars = async () => {
+        const data = await getCars()
+        setCars(data)
+    }
+
+    useEffect(() => {
+        fetchTrips()
+        fetchCars()
+    }, [])
+
+    useEffect(() => {
+        if (editingCar) {
+            setForm(editingCar)
+        }
+    }, [editingCar])
+
+    const handleSubmitCar = async () => {
+        const formData = new FormData()
+
+        Object.keys(form).forEach(key => {
+            formData.append(key, form[key])
+        })
+
+        if (image) {
+            formData.append("image", image)
+        }
+
+        try {
+            if (editingCar) {
+                await updateCar(editingCar._id, formData)
+                message.success("Car updated successfully 🚗")
+            } else {
+                await createCar(formData)
+                message.success("Car created successfully 🚀")
+            }
+
+            setForm({ name: '', brand: '', location: '', price: '' })
+            setImage(null)
+            setEditingCar(null)
+            fetchCars()
+        } catch (err) {
+            console.log('err:', err)
+            message.error("Something went wrong ❌")
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleDeleteCar = (id) => {
+        Modal.confirm({
+            title: "Delete Car",
+            content: "Are you sure you want to delete this car?",
+            okText: "Yes",
+            cancelText: "Cancel",
+            okType: "danger",
+            onOk: async () => {
+                try {
+                    await deleteCar(id)
+                    message.success("Deleted successfully 🗑")
+                    fetchCars()
+                } catch {
+                    message.error("Delete failed ❌")
+                }
+            }
+        })
     }
 
     return (
@@ -63,174 +135,333 @@ const AdminDashboard = () => {
             </div>
 
             {/* TABS */}
-            <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-                <button
-                    onClick={() => setActiveTab("users")}
-                    style={activeTab === "users" ? activeBtn : btn}
-                >
-                    👤 Users
-                </button>
+            <Tabs
+                defaultActiveKey="users"
+                size="large"
+                type="line"
+                items={[
+                    {
+                        key: "users",
+                        label: "👤 Users",
+                        children: <AdminUserTable />
+                    },
 
-                <button
-                    onClick={() => setActiveTab("trips")}
-                    style={activeTab === "trips" ? activeBtn : btn}
-                >
-                    🚗 Trips
-                </button>
-            </div>
+                    {
+                        key: "trips",
+                        label: "🚗 Trips",
+                        children: (
+                            <div style={tripContainer}>
+                                <table style={table}>
+                                    <thead>
+                                        <tr style={theadRow}>
+                                            <th>User</th>
+                                            <th>Pickup</th>
+                                            <th>Destination</th>
+                                            <th>Passengers</th>
+                                            <th style={{ textAlign: "center" }}>Status</th>
+                                            <th style={{ textAlign: "center" }}>Action</th>
+                                        </tr>
+                                    </thead>
 
-            {/* CONTENT */}
-            {activeTab === "users" && <AdminUserTable />}
+                                    <tbody>
+                                        {trips.map((trip) => (
+                                            <tr key={trip._id} style={row}>
+                                                <td style={cell}>{trip.user?.name}</td>
+                                                <td style={cell}>{trip.pickup}</td>
+                                                <td style={cell}>{trip.destination}</td>
+                                                <td style={cell}>{trip.passengers}</td>
 
-            {activeTab === "trips" && (
-                <div style={container}>
-                    <table style={table}>
-                        <thead>
-                            <tr style={theadRow}>
-                                <th>User</th>
-                                <th>Pickup</th>
-                                <th>Destination</th>
-                                <th>Passengers</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
+                                                <td style={{ ...cell, textAlign: "center" }}>
+                                                    <span style={{
+                                                        ...badge,
+                                                        background: getStatusColor(trip.status)
+                                                    }}>
+                                                        {trip.status}
+                                                    </span>
+                                                </td>
 
-                        <tbody>
-                            {trips.map((trip) => (
-                                <tr key={trip._id} style={row}>
-                                    <td style={userCell}>
-                                        <div style={avatar}>
-                                            {trip.user?.name?.charAt(0)}
-                                        </div>
-                                        {trip.user?.name}
-                                    </td>
+                                                <td style={{ ...cell, textAlign: "center" }}>
+                                                    <Select
+                                                        value={trip.status}
+                                                        style={{ width: 130 }}
+                                                        onChange={(value) =>
+                                                            handleChangeStatus(trip._id, value)
+                                                        }
+                                                        options={[
+                                                            { value: "pending", label: "Pending" },
+                                                            { value: "confirmed", label: "Confirmed" },
+                                                            { value: "completed", label: "Completed" },
+                                                            { value: "cancelled", label: "Cancelled" },
+                                                        ]}
+                                                    />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
+                    },
 
-                                    <td>{trip.pickup}</td>
-                                    <td>{trip.destination}</td>
-                                    <td>{trip.passengers}</td>
+                    {
+                        key: "cars",
+                        label: "🚘 Cars",
+                        children: (
+                            <div style={carWrapper}>
+                                {/* FORM */}
+                                <div style={carFormCard}>
+                                    <h2 style={carTitle}>
+                                        {editingCar ? "✏️ Edit Car" : "Add New Car"}
+                                    </h2>
 
-                                    <td>
-                                        <span
-                                            style={{
-                                                ...badge,
-                                                background: getStatusColor(trip.status)
-                                            }}
-                                        >
-                                            {trip.status}
-                                        </span>
-                                    </td>
+                                    <div style={carForm}>
+                                        <input
+                                            placeholder="Car name"
+                                            value={form.name}
+                                            onChange={e => setForm({ ...form, name: e.target.value })}
+                                            style={carInput}
+                                        />
 
-                                    <td>
-                                        <select
-                                            value={trip.status}
-                                            onChange={(e) =>
-                                                handleChangeStatus(trip._id, e.target.value)
-                                            }
-                                            style={select}
-                                        >
-                                            <option value="pending">Pending</option>
-                                            <option value="confirmed">Confirmed</option>
-                                            <option value="completed">Completed</option>
-                                            <option value="cancelled">Cancelled</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                                        <input
+                                            placeholder="Brand"
+                                            value={form.brand}
+                                            onChange={e => setForm({ ...form, brand: e.target.value })}
+                                            style={carInput}
+                                        />
+
+                                        <input
+                                            placeholder="Location"
+                                            value={form.location}
+                                            onChange={e => setForm({ ...form, location: e.target.value })}
+                                            style={carInput}
+                                        />
+
+                                        <input
+                                            placeholder="Price / day"
+                                            value={form.price}
+                                            onChange={e => setForm({ ...form, price: e.target.value })}
+                                            style={carInput}
+                                        />
+
+                                        <label style={uploadBox}>
+                                            📷 Upload Image
+                                            <input
+                                                type="file"
+                                                hidden
+                                                onChange={e => setImage(e.target.files[0])}
+                                            />
+                                        </label>
+
+                                        {image && (
+                                            <div style={previewBox}>
+                                                <img
+                                                    src={URL.createObjectURL(image)}
+                                                    style={previewImg}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <button style={carSubmit} onClick={handleSubmitCar} disabled={loading}>
+                                            {loading ? "Processing..." : editingCar ? "Update Car" : "+ Add Car"}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* LIST */}
+                                <div style={carListCard}>
+                                    <h2 style={carTitle}>Car List</h2>
+
+                                    <div style={carGrid}>
+                                        {cars.map(car => (
+                                            <div key={car._id} style={carItem}>
+                                                <img
+                                                    src={`http://localhost:5000${car.image}`}
+                                                    style={carImage}
+                                                />
+
+                                                <h4>{car.name}</h4>
+                                                <p>{car.brand}</p>
+                                                <p>{car.location}</p>
+                                                <p style={price}>{car.price}/day</p>
+
+                                                <div style={actionRow}>
+                                                    <button style={editBtn} onClick={() => setEditingCar(car)}>
+                                                        Edit
+                                                    </button>
+
+                                                    <button style={deleteBtn} onClick={() => handleDeleteCar(car._id)}>
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    }
+                ]}
+            />
         </div>
     )
 }
 
 export default AdminDashboard
 
-// 🎨 STYLE
+// ===== STYLE =====
 
-const cardStyle = {
+const cardStyle = { background: "#fff", padding: 20, borderRadius: 10 }
+const numberStyle = { fontSize: 24, fontWeight: "bold" }
+
+const tripContainer = {
     background: "#fff",
     padding: 20,
-    borderRadius: 10,
-    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-    flex: 1
-}
-
-const numberStyle = {
-    fontSize: 24,
-    fontWeight: "bold"
-}
-
-const btn = {
-    padding: "10px 20px",
-    border: "none",
-    background: "#eee",
-    cursor: "pointer",
-    borderRadius: 8
-}
-
-const activeBtn = {
-    ...btn,
-    background: "#406093",
-    color: "#fff"
-}
-
-const container = {
-    background: "#fff",
-    padding: 20,
-    borderRadius: 15,
-    boxShadow: "0 5px 20px rgba(0,0,0,0.08)"
+    borderRadius: 16,
+    boxShadow: "0 10px 30px rgba(0,0,0,0.08)"
 }
 
 const table = {
     width: "100%",
-    borderCollapse: "separate",
-    borderSpacing: "0 10px"
+    borderCollapse: "collapse"
 }
 
 const theadRow = {
     textAlign: "left",
-    color: "#888",
-    fontSize: 14
+    color: "#666",
+    fontSize: 13,
+    borderBottom: "2px solid #eee"
 }
 
 const row = {
-    background: "#f9fafb",
-    borderRadius: 10
+    borderBottom: "1px solid #eee"
 }
 
-const userCell = {
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    fontWeight: 500
-}
-
-const avatar = {
-    width: 35,
-    height: 35,
-    borderRadius: "50%",
-    background: "#406093",
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontWeight: "bold"
+const cell = {
+    padding: "14px 16px",
+    verticalAlign: "middle"
 }
 
 const badge = {
-    padding: "6px 12px",
+    padding: "6px 14px",
     borderRadius: 20,
     color: "#fff",
     fontSize: 12,
-    textTransform: "capitalize",
     fontWeight: 500
 }
 
-const select = {
+/* ===== CAR ===== */
+
+const carWrapper = {
+    display: "grid",
+    gridTemplateColumns: "350px 1fr",
+    gap: 20
+}
+
+const carFormCard = {
+    background: "#fff",
+    padding: 20,
+    borderRadius: 16,
+    boxShadow: "0 10px 30px rgba(0,0,0,0.08)"
+}
+
+const carListCard = {
+    background: "#fff",
+    padding: 20,
+    borderRadius: 16,
+    boxShadow: "0 10px 30px rgba(0,0,0,0.08)"
+}
+
+const carTitle = {
+    marginBottom: 15
+}
+
+const carForm = {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12
+}
+
+const carInput = {
+    padding: "10px",
+    borderRadius: 10,
+    border: "1px solid #ddd"
+}
+
+const uploadBox = {
+    padding: "10px",
+    background: "#406093",
+    color: "#fff",
+    textAlign: "center",
+    borderRadius: 10,
+    cursor: "pointer"
+}
+
+const previewBox = {
+    marginTop: 10
+}
+
+const previewImg = {
+    width: "100%",
+    borderRadius: 10
+}
+
+const carSubmit = {
+    padding: "12px",
+    background: "#22c55e",
+    color: "#fff",
+    border: "none",
+    borderRadius: 10,
+    fontWeight: "bold",
+    cursor: "pointer"
+}
+
+const carGrid = {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+    gap: 20
+}
+
+const carItem = {
+    background: "#f9fafb",
+    padding: 15,
+    borderRadius: 12,
+    textAlign: "center"
+}
+
+const carImage = {
+    width: "100%",
+    height: 120,
+    objectFit: "cover",
+    borderRadius: 10,
+    marginBottom: 10
+}
+
+const price = {
+    color: "#22c55e",
+    fontWeight: "bold"
+}
+
+const actionRow = {
+    display: "flex",
+    justifyContent: "center",
+    gap: 10,
+    marginTop: 10
+}
+
+const editBtn = {
+    background: "#3b82f6",
+    color: "#fff",
+    border: "none",
     padding: "6px 10px",
     borderRadius: 8,
-    border: "1px solid #ddd",
+    cursor: "pointer"
+}
+
+const deleteBtn = {
+    background: "#ef4444",
+    color: "#fff",
+    border: "none",
+    padding: "6px 10px",
+    borderRadius: 8,
     cursor: "pointer"
 }
