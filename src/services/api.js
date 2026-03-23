@@ -1,4 +1,4 @@
-const BASE_URL = 'https://phgo-web-backend.onrender.com/'
+const BASE_URL = 'http://localhost:5000'
 
 export const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token')
