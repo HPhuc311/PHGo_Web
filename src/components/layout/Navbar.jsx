@@ -48,8 +48,8 @@ const Navbar = () => {
                 <span style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
                     Home
                 </span>
-                <span style={{ cursor: 'pointer' }} onClick={() => navigate('/booking')}>
-                    Booking
+                <span style={{ cursor: 'pointer' }} onClick={() => navigate('/cars-list')}>
+                    Cars
                 </span>
                 <span style={{ cursor: 'pointer' }} onClick={() => navigate('/trips')}>
                     My Trips

@@ -7,7 +7,7 @@ const TripCard = ({ trip }) => {
         Modal.confirm({
             title: 'Cancel Trip?',
             content: 'Are you sure you want to cancel this trip?',
-            okText: 'Yes, Cancel',
+            okText: '  Yes, Cancel',
             cancelText: 'No',
             onOk: async () => {
                 await cancelTrip(trip._id)
@@ -47,18 +47,27 @@ const TripCard = ({ trip }) => {
                         : '#fff'
             }}
         >
-            <h3>{trip.car}</h3>
+            <h3>{trip.carName}</h3>
 
             {getStatusTag()}
 
             <p><b>From:</b> {trip.pickup}</p>
+
             {trip.destination && (
                 <p><b>To:</b> {trip.destination}</p>
             )}
 
             <p><b>Passengers:</b> {trip.passengers}</p>
-            <p><b>Price:</b> {trip.price}</p>
-            <p><b>Date:</b> {trip.date}</p>
+
+            <p>
+                <b>Price:</b>{" "}
+                {Number(trip.price).toLocaleString()} VND
+            </p>
+
+            <p>
+                <b>Date:</b> {trip.date || 'N/A'}
+            </p>
+
             <p><b>Service:</b> {trip.service}</p>
 
             {/* ❌ Không cho cancel nếu đã huỷ */}

@@ -77,7 +77,7 @@ const AdminDashboard = () => {
                 message.success("Car created successfully 🚀")
             }
 
-            setForm({ name: '', brand: '', location: '', price: '' })
+            setForm({ name: '', brand: '', location: '', price: '', seats: '' })
             setImage(null)
             setEditingCar(null)
             fetchCars()
@@ -243,6 +243,13 @@ const AdminDashboard = () => {
                                             style={carInput}
                                         />
 
+                                        <input
+                                            placeholder="Seats"
+                                            value={form.seats}
+                                            onChange={e => setForm({ ...form, seats: e.target.value })}
+                                            style={carInput}
+                                        />
+
                                         <label style={uploadBox}>
                                             📷 Upload Image
                                             <input
@@ -282,7 +289,7 @@ const AdminDashboard = () => {
                                                 <h4>{car.name}</h4>
                                                 <p>{car.brand}</p>
                                                 <p>{car.location}</p>
-                                                <p style={price}>{car.price}/day</p>
+                                                <p style={price}> {Number(car.price).toLocaleString()}/day</p>
 
                                                 <div style={actionRow}>
                                                     <button style={editBtn} onClick={() => setEditingCar(car)}>

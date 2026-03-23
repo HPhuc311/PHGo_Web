@@ -14,6 +14,7 @@ import MyTrips from './pages/MyTrip'
 import AdminRoute from './components/routes/AdminRoute'
 import AdminDashboard from './pages/AdminDashboard'
 import UserRoute from './components/routes/UserRoute'
+import Cars from './pages/Car'
 
 const { Content } = Layout
 
@@ -35,6 +36,7 @@ function App() {
                         <Route path="/register" element={<Register />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/profile" element={<Profile />} />
+                        <Route path="/cars-list" element={<Cars />} />
                         <Route
                             path="/admin"
                             element={
@@ -60,6 +62,7 @@ function App() {
                                 </UserRoute>
                             }
                         />
+
                     </Routes>
                 </Content>
             </div>

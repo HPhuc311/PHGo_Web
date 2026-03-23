@@ -23,7 +23,7 @@ const BookingForm = ({ onNext }) => {
             <Form.Item
                 label="Service Type"
                 name="service"
-                initialValue="Local Ride"
+                initialValue="Please Choose Your Services"
                 rules={[{ required: true }]}
             >
                 <Select onChange={(value) => setServiceType(value)}>
@@ -34,7 +34,7 @@ const BookingForm = ({ onNext }) => {
             </Form.Item>
 
             {/* ✅ LOCAL RIDE */}
-            {serviceType === 'local' && (
+            {serviceType === 'Local Ride' && (
                 <>
                     <Form.Item
                         label="Pickup Location"
@@ -55,7 +55,7 @@ const BookingForm = ({ onNext }) => {
             )}
 
             {/* ✅ AIRPORT */}
-            {serviceType === 'airport' && (
+            {serviceType === 'Airport Transfer' && (
                 <>
                     <Form.Item
                         label="Airport"
@@ -76,7 +76,7 @@ const BookingForm = ({ onNext }) => {
             )}
 
             {/* ✅ DAILY HIRE */}
-            {serviceType === 'daily' && (
+            {serviceType === 'Daily Hire' && (
                 <Form.Item
                     label="Pickup Address"
                     name="pickup"
@@ -103,46 +103,7 @@ const BookingForm = ({ onNext }) => {
                     format="DD-MM-YYYY HH:mm"
                 />
             </Form.Item>
-
-            {/* PASSENGERS */}
-            <Form.Item
-                label="Passengers"
-                name="passengers"
-                rules={[{ required: true }]}
-            >
-                <InputNumber min={1} max={7} style={{ width: '100%' }} />
-            </Form.Item>
-
-            {/* CAR */}
-            <Form.Item
-                label="Car Type"
-                name="carType"
-                dependencies={['passengers']}
-                rules={[
-                    { required: true },
-                    ({ getFieldValue }) => ({
-                        validator(_, value) {
-                            const passengers = getFieldValue('passengers')
-
-                            if (!passengers || !value) return Promise.resolve()
-
-                            if (passengers >= 5 && value === '4') {
-                                return Promise.reject(
-                                    new Error('5-7 passengers must choose 7-seat car')
-                                )
-                            }
-
-                            return Promise.resolve()
-                        }
-                    })
-                ]}
-            >
-                <Select>
-                    <Select.Option value="4">4 seats</Select.Option>
-                    <Select.Option value="7">7 seats</Select.Option>
-                </Select>
-            </Form.Item>
-
+            
             {/* NOTIFICATION */}
             <Form.Item label="Notification" name="notification">
                 <Radio.Group>

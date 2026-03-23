@@ -1,7 +1,7 @@
 import { Card, Radio, Button } from 'antd'
 
 const PaymentSection = ({ bookingData, onConfirm }) => {
-    const price = 1000000 + (bookingData.passengers || 1) * 50000
+    const price = Number(bookingData?.car?.price || 0)
 
     return (
         <Card title="Payment">

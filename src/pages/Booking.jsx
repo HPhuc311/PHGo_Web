@@ -4,30 +4,39 @@ import BookingForm from '../components/booking/BookingForm'
 import PaymentSection from '../components/booking/PaymentSection'
 import Receipt from '../components/booking/Receipt'
 import { createTrip } from '../services/tripServices'
+import { useLocation } from 'react-router-dom'
 
 
 const Booking = () => {
     const [step, setStep] = useState(1)
     const [bookingData, setBookingData] = useState(null)
     const [price, setPrice] = useState(0)
+    const location = useLocation()
+    const selectedCar = location.state?.car
 
-    const handleConfirm = async (price) => {
-        if (!bookingData) return
+    const handleConfirm = async () => {
+        if (!bookingData || !selectedCar) return
 
         try {
+            const [start, end] = bookingData.time || []
+
             const newTrip = {
-                car: 'Selected Car',
+                car: selectedCar._id, // lưu id
+                carName: selectedCar.name, // ✅ lưu tên để hiển thị
+
                 pickup: bookingData.pickup,
                 destination: bookingData.destination,
-                date: new Date().toLocaleDateString(),
+
+                date: `${start?.format('DD-MM-YYYY HH:mm')} - ${end?.format('DD-MM-YYYY HH:mm')}`,
+
                 passengers: bookingData.passengers,
-                price: price + ' VND',
-                // ✅ ADD
+                price: selectedCar.price, // lấy từ xe
                 service: bookingData.service,
             }
-            await createTrip(newTrip) // ✅ dùng API
 
-            setPrice(price)
+            await createTrip(newTrip)
+
+            setPrice(selectedCar.price)
             setStep(3)
 
         } catch (err) {
@@ -42,7 +51,11 @@ const Booking = () => {
                 <Card title="Book Your Ride" variant="outlined">
                     <BookingForm
                         onNext={(data) => {
-                            setBookingData(data)
+                            setBookingData({
+                                ...data,
+                                passengers: selectedCar.seats, // ✅ tự set
+                                car: selectedCar 
+                            })
                             setStep(2)
                         }}
                     />

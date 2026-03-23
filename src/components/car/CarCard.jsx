@@ -7,11 +7,12 @@ const CarCard = ({ car }) => {
     return (
         <Card
             hoverable
-            style={{ borderRadius: '16px' }}
+            style={{ borderRadius: '16px'}}
             cover={
                 <img
                     src={`http://localhost:5000${car.image}`}
                     alt={car.name}
+                    style={{ width: "100%" , height: "120px",objectFit: "cover",borderRadius: "10px",marginBottom: 10,}}
                 />
             }
             onClick={() => navigate(`/cars/${car._id}`)}
@@ -23,14 +24,16 @@ const CarCard = ({ car }) => {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>⭐ {car.rating}</span>
-                    <span style={{ color: '#2ecc71', fontWeight: 'bold' }}>
-                        {car.price}/ngày
+                    <span style={{ color: '#406093', fontWeight: 'bold' }}>
+                        {Number(car.price).toLocaleString()}/day
                     </span>
                 </div>
 
+                <p>{car.seats} seats</p>
+
                 <div style={{ marginTop: '8px' }}>
                     {car.tags?.map((tag, i) => (
-                        <Tag key={i}>{tag}</Tag> 
+                        <Tag key={i}>{tag}</Tag>
                     ))}
                 </div>
             </div>

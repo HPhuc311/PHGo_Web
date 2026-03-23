@@ -6,7 +6,9 @@ const Receipt = ({ bookingData, price }) => {
     return (
         <Card title="Booking Receipt" variant="outlined">
             <p><b>Pickup:</b> {bookingData?.pickup}</p>
-            <p><b>Destination:</b> {bookingData?.destination}</p>
+            {bookingData?.service !== 'Daily Hire' && (
+                <p><b>Destination:</b> {bookingData?.destination}</p>
+            )}
             <p><b>Passengers:</b> {bookingData?.passengers}</p>
             <p><b>Service:</b> {bookingData?.service}</p>
 
