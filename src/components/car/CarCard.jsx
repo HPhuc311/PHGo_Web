@@ -12,7 +12,7 @@ const CarCard = ({ car }) => {
                 <img
                     src={`http://localhost:5000${car.image}`}
                     alt={car.name}
-                    style={{ width: "100%" , height: "120px",objectFit: "cover",borderRadius: "10px",marginBottom: 10,}}
+                    style={{ width: "100%" , height: "120px",objectFit: "cover",borderRadius: "10px",marginBottom: 10}}
                 />
             }
             onClick={() => navigate(`/cars/${car._id}`)}
