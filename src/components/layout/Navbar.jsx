@@ -2,6 +2,7 @@ import { Avatar, Dropdown } from 'antd'
 import { BellOutlined, DownOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { buildImageUrl } from '../../utils/image'
 
 const Navbar = () => {
     const navigate = useNavigate()
@@ -24,7 +25,6 @@ const Navbar = () => {
             },
         },
     ]
-
     return (
         <div
             style={{
@@ -99,10 +99,7 @@ const Navbar = () => {
                             }}
                         >
                     
-                                <Avatar src={user.avatar?.startsWith('http')
-                                    ? user.avatar
-                                    : `${API_URL}/${user.avatar}`}>
-                                </Avatar>
+                               <Avatar src={buildImageUrl(user.avatar)} />
                             <span>{user.name}</span>
                             <DownOutlined style={{ fontSize: '12px' }} />
                         </div>

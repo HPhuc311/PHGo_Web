@@ -1,5 +1,6 @@
 import { Card, Tag } from 'antd'
 import { useNavigate } from 'react-router-dom'
+import { buildImageUrl } from '../../utils/image'
 
 const CarCard = ({ car }) => {
     const navigate = useNavigate()
@@ -10,7 +11,7 @@ const CarCard = ({ car }) => {
             style={{ borderRadius: '16px'}}
             cover={
                 <img
-                    src={`http://localhost:5000${car.image}`}
+                    src={buildImageUrl(car.image)}
                     alt={car.name}
                     style={{ width: "100%" , height: "120px",objectFit: "cover",borderRadius: "10px",marginBottom: 10}}
                 />

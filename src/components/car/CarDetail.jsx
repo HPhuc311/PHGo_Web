@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Card, Button } from 'antd'
 import { getCars } from '../../services/carService'
+import { buildImageUrl } from '../../utils/image'
 
 const CarDetail = () => {
     const { id } = useParams()
@@ -23,7 +24,7 @@ const CarDetail = () => {
         <div style={{ maxWidth: '800px', margin: 'auto' }}>
             <Card>
                 <img
-                    src={`http://localhost:5000${car.image}`}
+                    src={buildImageUrl(car.image)}
                     style={{ width: '100%', borderRadius: 10 }}
                 />
 

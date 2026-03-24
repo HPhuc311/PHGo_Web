@@ -3,6 +3,7 @@ import AdminUserTable from "../components/admin/AdminUserTable"
 import { getAllTrips, updateTripStatus } from "../services/tripServices"
 import { createCar, getCars, deleteCar, updateCar } from "../../src/services/carService"
 import { message, Modal, Select, Tabs } from "antd"
+import { buildImageUrl } from "../utils/image"
 
 const AdminDashboard = () => {
     const [trips, setTrips] = useState([])
@@ -283,7 +284,7 @@ const AdminDashboard = () => {
                                         {cars.map(car => (
                                             <div key={car._id} style={carItem}>
                                                 <img
-                                                    src={`http://localhost:5000${car.image}`}
+                                                    src={buildImageUrl(car.image)}
                                                     style={carImage}
                                                 />
 

@@ -3,7 +3,7 @@ import { Card, Form, Input, Button, message } from 'antd'
 import { useAuth } from '../context/AuthContext'
 import { EditOutlined } from '@ant-design/icons'
 import fetchWithAuth from '../services/api'
-
+import { buildImageUrl } from '../utils/image'
 
 const Profile = () => {
     const [form] = Form.useForm()
@@ -14,6 +14,8 @@ const Profile = () => {
 
     const [preview, setPreview] = useState(null)
     const [file, setFile] = useState(null)
+
+
 
     const fileInputRef = useRef()
 
@@ -43,11 +45,7 @@ const Profile = () => {
     if (!user) return <div>Please login</div>
 
     const avatarUrl =
-        preview ||
-        (user.avatar?.startsWith('http')
-            ? user.avatar
-            : `${import.meta.env.VITE_API_URL}/${user.avatar}`)
-
+        preview || buildImageUrl(user?.avatar)
     // Click avatar to open file picker
     const handleAvatarClick = () => {
         if (!editing) return
@@ -69,12 +67,10 @@ const Profile = () => {
         formData.append('avatar', file)
 
         try {
-            const res = await fetchWithAuth('/api/user/avatar', {
+            const data = await fetchWithAuth('/api/user/avatar', {
                 method: 'PUT',
                 body: formData
             })
-
-            const data = await res.json()
 
             updateProfile({ avatar: data.avatar })
             message.success('Avatar uploaded successfully')
@@ -90,12 +86,11 @@ const Profile = () => {
         setLoading(true)
 
         try {
-            const res = await fetchWithAuth('/api/user/update', {
+            const data = await fetchWithAuth('/api/user/update', {
                 method: 'PUT',
                 body: JSON.stringify(values)
             })
 
-            const data = await res.json()
             updateProfile(data.user)
 
             message.success('Profile updated successfully')
