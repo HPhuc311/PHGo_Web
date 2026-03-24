@@ -1,12 +1,16 @@
-const BASE_URL = 'http://localhost:5000'
+const BASE_URL = import.meta.env.VITE_API_URL
 
 export const fetchWithAuth = async (url, options = {}) => {
     const token = localStorage.getItem('token')
 
     const headers = {
-        'Content-Type': 'application/json',
         ...options.headers,
         Authorization: token ? `Bearer ${token}` : ''
+    }
+
+    // 👉 CHỈ set JSON nếu KHÔNG phải FormData
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json'
     }
 
     const res = await fetch(BASE_URL + url, {
@@ -15,7 +19,6 @@ export const fetchWithAuth = async (url, options = {}) => {
     })
 
     const data = await res.json()
-
     return data
 }
 

@@ -1,19 +1,15 @@
-const API_URL = 'http://localhost:5000/api/auth'
+const API_URL = import.meta.env.VITE_API_URL + '/api/auth'
 
-// REGISTER
 export const registerAPI = async (data) => {
     const res = await fetch(`${API_URL}/register`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
 
     return res.json()
 }
 
-// LOGIN
 export const loginAPI = async (data) => {
     const res = await fetch(`${API_URL}/login`, {
         method: 'POST',

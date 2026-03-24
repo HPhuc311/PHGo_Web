@@ -1,31 +1,41 @@
 import API from './api'
 
-// GET CARS
-export const getCars = () =>
-    API('/api/cars')
+export const getCars = () => API('/api/cars')
 
-// ADMIN CREATE CAR
-export const createCar = (formData) =>
-    fetch('http://localhost:5000/api/cars', {
+// CREATE
+export const createCar = (formData) => {
+    const token = localStorage.getItem("token")
+
+    return API('/api/cars', {
         method: 'POST',
+        body: formData,
         headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData
-    }).then(res => res.json())
+            Authorization: `Bearer ${token}`
+        }
+    })
+}
 
 // UPDATE
-export const updateCar = (id, formData) =>
-    fetch(`http://localhost:5000/api/cars/${id}`, {
+export const updateCar = (id, formData) => {
+    const token = localStorage.getItem("token")
+
+    return API(`/api/cars/${id}`, {
         method: 'PUT',
+        body: formData,
         headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData
-    }).then(res => res.json())
+            Authorization: `Bearer ${token}`
+        }
+    })
+}
 
 // DELETE
-export const deleteCar = (id) =>
-    API(`/api/cars/${id}`, {
-        method: 'DELETE'
+export const deleteCar = (id) => {
+    const token = localStorage.getItem("token")
+
+    return API(`/api/cars/${id}`, {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
     })
+}

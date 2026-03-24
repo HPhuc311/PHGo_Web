@@ -14,7 +14,8 @@ const AdminDashboard = () => {
         name: '',
         brand: '',
         location: '',
-        price: ''
+        price: '',
+        seats:'',
     })
 
     const [image, setImage] = useState(null)
