@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from 'react'
 import { Card, Form, Input, Button, message } from 'antd'
 import { useAuth } from '../context/AuthContext'
 import { EditOutlined } from '@ant-design/icons'
+import fetchWithAuth from '../services/api'
+
 
 const Profile = () => {
     const [form] = Form.useForm()
@@ -20,13 +22,7 @@ const Profile = () => {
 
         const fetchProfile = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/user/profile', {
-                    headers: {
-                        Authorization: `Bearer ${user.token}`
-                    }
-                })
-
-                const data = await res.json()
+                const data = await fetchWithAuth('/api/user/profile')
 
                 form.setFieldsValue({
                     name: data.name,
@@ -34,7 +30,8 @@ const Profile = () => {
                     phone: data.phone,
                     address: data.address
                 })
-            } catch {
+            } catch (err) {
+                console.error(err)
                 message.error('Failed to fetch user data')
             }
         }
@@ -49,7 +46,7 @@ const Profile = () => {
         preview ||
         (user.avatar?.startsWith('http')
             ? user.avatar
-            : `http://localhost:5000/${user.avatar}`)
+            : `${import.meta.env.VITE_API_URL}/${user.avatar}`)
 
     // Click avatar to open file picker
     const handleAvatarClick = () => {
@@ -72,11 +69,8 @@ const Profile = () => {
         formData.append('avatar', file)
 
         try {
-            const res = await fetch('http://localhost:5000/api/user/avatar', {
+            const res = await fetchWithAuth('/api/user/avatar', {
                 method: 'PUT',
-                headers: {
-                    Authorization: `Bearer ${user.token}`
-                },
                 body: formData
             })
 
@@ -96,12 +90,8 @@ const Profile = () => {
         setLoading(true)
 
         try {
-            const res = await fetch('http://localhost:5000/api/user/update', {
+            const res = await fetchWithAuth('/api/user/update', {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${user.token}`
-                },
                 body: JSON.stringify(values)
             })
 
