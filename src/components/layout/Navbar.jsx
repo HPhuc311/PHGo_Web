@@ -7,6 +7,8 @@ const Navbar = () => {
     const navigate = useNavigate()
     const { user, logout } = useAuth()
 
+    const API_URL = import.meta.env.VITE_API_URL
+
     const dropdownItems = [
         {
             key: 'profile',
@@ -99,7 +101,7 @@ const Navbar = () => {
                     
                                 <Avatar src={user.avatar?.startsWith('http')
                                     ? user.avatar
-                                    : `http://localhost:5000/${user.avatar}`}>
+                                    : `${API_URL}/${user.avatar}`}>
                                 </Avatar>
                             <span>{user.name}</span>
                             <DownOutlined style={{ fontSize: '12px' }} />
