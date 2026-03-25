@@ -6,7 +6,7 @@ const { RangePicker } = DatePicker
 
 const BookingForm = ({ onNext }) => {
     const [form] = Form.useForm()
-    const [serviceType, setServiceType] = useState('local')
+    const [serviceType, setServiceType] = useState('Local Ride')
 
     const handleSubmit = (values) => {
         onNext(values)
@@ -23,7 +23,7 @@ const BookingForm = ({ onNext }) => {
             <Form.Item
                 label="Service Type"
                 name="service"
-                initialValue="Please Choose Your Services"
+                initialValue="Local Ride"
                 rules={[{ required: true }]}
             >
                 <Select onChange={(value) => setServiceType(value)}>
