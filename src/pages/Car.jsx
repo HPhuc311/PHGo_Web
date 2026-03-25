@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Row, Col, Spin } from 'antd'
+import { Row, Col, Spin, Empty } from 'antd'
 import { getCars } from '../services/carService'
 import CarCard from '../components/car/CarCard'
 import CarFilter from '../components/car/CarFilter'

@@ -1,14 +1,9 @@
 import API from './api'
 
 export const createTrip = (data) => {
-    const token = localStorage.getItem("token")
-
     return API('/api/trips', {
         method: 'POST',
         body: JSON.stringify(data),
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
     })
 }
 
