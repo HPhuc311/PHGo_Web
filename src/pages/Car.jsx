@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Row, Col } from 'antd'
+import { Row, Col, Spin } from 'antd'
 import { getCars } from '../services/carService'
 import CarCard from '../components/car/CarCard'
 import CarFilter from '../components/car/CarFilter'
@@ -7,12 +7,21 @@ import CarFilter from '../components/car/CarFilter'
 const Cars = () => {
     const [cars, setCars] = useState([])
     const [filteredCars, setFilteredCars] = useState([])
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchCars = async () => {
-            const data = await getCars()
-            setCars(data)
-            setFilteredCars(data)
+            try {
+                const data = await getCars()
+                setCars(Array.isArray(data) ? data : [])
+                setFilteredCars(Array.isArray(data) ? data : [])
+            } catch (err) {
+                console.error(err)
+                setCars([])
+                setFilteredCars([])
+            } finally {
+                setLoading(false) // 🔥 tắt loading
+            }
         }
 
         fetchCars()
@@ -52,13 +61,21 @@ const Cars = () => {
             </div>
 
             {/* LIST */}
-            <Row gutter={[16, 16]} style={{ marginTop: 30 }}>
-                {filteredCars.map(car => (
-                    <Col span={6} key={car._id}>
-                        <CarCard car={car} />
-                    </Col>
-                ))}
-            </Row>
+                {loading ? (
+                    <div style={{ textAlign: 'center', marginTop: 50 }}>
+                        <Spin size="large" />
+                    </div>
+                ) : filteredCars.length === 0 ? (
+                    <Empty description="No cars found" />
+                ) : (
+                    <Row gutter={[16, 16]} style={{marginTop: 30}}>
+                        {filteredCars.map(car => (
+                            <Col span={6} key={car._id}>
+                                <CarCard car={car} />
+                            </Col>
+                        ))}
+                    </Row>
+                )}
         </div>
     )
 }

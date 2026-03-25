@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Tabs, Empty } from 'antd'
+import { Tabs, Empty, Spin } from 'antd'
 import { getMyTrips } from '../services/tripServices'
 import TripCard from '../components/trip/TripCard'
 
 const MyTrips = () => {
     const [trips, setTrips] = useState([])
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchTrips = async () => {
@@ -13,7 +14,8 @@ const MyTrips = () => {
                 setTrips(Array.isArray(res) ? res : [])
             } catch (err) {
                 console.error(err)
-                setTrips([])
+            } finally {
+                setLoading(false)
             }
         }
 
@@ -49,6 +51,14 @@ const MyTrips = () => {
             children: renderTrips('cancelled')
         }
     ]
+
+    if (loading) {
+        return (
+            <div style={{ textAlign: 'center', marginTop: 100 }}>
+                <Spin size="large" />
+            </div>
+        )
+    }
 
     return (
         <div style={{ maxWidth: '900px', margin: 'auto' }}>

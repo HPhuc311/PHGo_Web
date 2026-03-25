@@ -99,7 +99,7 @@ const Navbar = () => {
                             }}
                         >
                     
-                               <Avatar src={buildImageUrl(user.avatar)} />
+                            <Avatar src={buildImageUrl(user.avatar)} />
                             <span>{user.name}</span>
                             <DownOutlined style={{ fontSize: '12px' }} />
                         </div>

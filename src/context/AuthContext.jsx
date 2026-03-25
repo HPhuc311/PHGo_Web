@@ -1,3 +1,4 @@
+import { Spin } from 'antd'
 import { createContext, useContext, useState, useEffect } from 'react'
 
 const AuthContext = createContext()
@@ -15,6 +16,14 @@ export const AuthProvider = ({ children }) => {
             setUser(null) // null = chưa login
         }
     }, [])
+
+    if (user === undefined) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 200 }}>
+                <Spin size="large" />
+            </div>
+        )
+    }
 
     const login = (data) => {
         setUser(data)

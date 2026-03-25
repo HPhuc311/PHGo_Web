@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { Card, Button } from 'antd'
+import { Card, Button, Spin } from 'antd'
 import { getCars } from '../../services/carService'
 import { buildImageUrl } from '../../utils/image'
 
@@ -18,7 +18,13 @@ const CarDetail = () => {
         fetchCar()
     }, [id])
 
-    if (!car) return <div>Loading...</div>
+    if (!car) {
+        return (
+            <div style={{ textAlign: 'center', marginTop: 100 }}>
+                <Spin size="large" />
+            </div>
+        )
+    }
 
     return (
         <div style={{ maxWidth: '800px', margin: 'auto' }}>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import AdminUserTable from "../components/admin/AdminUserTable"
 import { getAllTrips, updateTripStatus } from "../services/tripServices"
 import { createCar, getCars, deleteCar, updateCar } from "../../src/services/carService"
-import { message, Modal, Select, Tabs } from "antd"
+import { message, Modal, Select, Spin, Tabs } from "antd"
 import { buildImageUrl } from "../utils/image"
 
 const AdminDashboard = () => {
@@ -44,9 +44,16 @@ const AdminDashboard = () => {
 
     // ================= CARS =================
     const fetchCars = async () => {
-        const data = await getCars()
-        setCars(data)
+        try {
+            setLoading(true)
+            const data = await getCars()
+            setCars(data)
+        } finally {
+            setLoading(false)
+        }
     }
+
+
 
     useEffect(() => {
         fetchTrips()
@@ -108,6 +115,14 @@ const AdminDashboard = () => {
                 }
             }
         })
+    }
+
+    if (loading) {
+        return (
+            <div style={{ textAlign: 'center', marginTop: 100 }}>
+                <Spin size="large" />
+            </div>
+        )
     }
 
     return (

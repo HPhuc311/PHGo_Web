@@ -14,7 +14,7 @@ const Booking = () => {
     const location = useLocation()
     const selectedCar = location.state?.car
 
-    const handleConfirm = async () => {
+    const handleConfirm = async (totalPrice) => {
         if (!bookingData || !selectedCar) return
 
         try {
@@ -30,13 +30,13 @@ const Booking = () => {
                 date: `${start?.format('DD-MM-YYYY HH:mm')} - ${end?.format('DD-MM-YYYY HH:mm')}`,
 
                 passengers: bookingData.passengers,
-                price: selectedCar.price, // lấy từ xe
+                price: totalPrice, // lấy từ xe
                 service: bookingData.service,
             }
 
             await createTrip(newTrip)
 
-            setPrice(selectedCar.price)
+            setPrice(totalPrice)
             setStep(3)
 
         } catch (err) {
@@ -53,7 +53,7 @@ const Booking = () => {
                         onNext={(data) => {
                             setBookingData({
                                 ...data,
-                                passengers: selectedCar.seats, // ✅ tự set
+                                passengers: selectedCar.seats, 
                                 car: selectedCar 
                             })
                             setStep(2)

@@ -1,18 +1,35 @@
 import { useEffect, useState } from 'react'
 import CarCard from './CarCard'
 import { getCars } from '../../services/carService'
+import { Spin } from 'antd'
 
 const CarList = () => {
     const [cars, setCars] = useState([])
+    const [loading, setLoading] = useState(true) 
 
     useEffect(() => {
         const fetchCars = async () => {
-            const data = await getCars()
-            setCars(data)
+            try {
+                const data = await getCars()
+                setCars(data)
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setLoading(false)
+            }
         }
 
         fetchCars()
     }, [])
+
+    // ✅ LOADING UI
+    if (loading) {
+        return (
+            <div style={{ textAlign: 'center', marginTop: '60px' }}>
+                <Spin size="large" />
+            </div>
+        )
+    }
 
     return (
         <div style={{ marginTop: '40px' }}>

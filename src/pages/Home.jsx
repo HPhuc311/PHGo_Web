@@ -1,5 +1,4 @@
 import HeroSection from '../components/home/HeroSection'
-import SearchBox from '../components/common/SearchBox'
 import PromotionSection from '../components/home/PromotionSection'
 import CarList from '../components/car/CarList'
 import FeatureSection from '../components/home/FeatureSection'
@@ -10,8 +9,6 @@ const Home = () => {
         <div style={{ background: '#f5f5f5' }}>
 
             <HeroSection />
-
-            <SearchBox />
 
             <PromotionSection />
 
