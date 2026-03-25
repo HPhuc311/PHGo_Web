@@ -53,7 +53,7 @@ const CarList = () => {
                     <Button
                         type="primary"
                         size="large"
-                        onClick={() => navigate('/all-cars')} 
+                        onClick={() => navigate('/cars-list')} 
                     >
                         View More Cars
                     </Button>
