@@ -38,7 +38,7 @@ const CarDetail = () => {
                 <p>📍 {car.location}</p>
                 <p>🚗 {car.brand}</p>
 
-                <p style={{ color: '#2ecc71', fontSize: 18 }}>
+                <p style={{ color: '#406093', fontSize: 18 }}>
                     {Number(car.price).toLocaleString()}/day
                 </p>
 

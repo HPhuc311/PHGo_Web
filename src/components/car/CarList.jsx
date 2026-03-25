@@ -54,6 +54,7 @@ const CarList = () => {
                         type="primary"
                         size="large"
                         onClick={() => navigate('/cars-list')} 
+                        style={{ backgroundColor: "#406093"}}
                     >
                         View More Cars
                     </Button>

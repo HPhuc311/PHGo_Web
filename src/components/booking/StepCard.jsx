@@ -13,7 +13,7 @@ const StepCard = ({ step, title, description, icon }) => {
             <div style={{ fontSize: '50px' }}>{icon}</div>
 
             <h4 style={{ marginTop: '10px' }}>
-                <span style={{ color: '#2ecc71', marginRight: '5px' }}>
+                <span style={{ color: '#406093', marginRight: '5px' }}>
                     {step}
                 </span>
                 {title}

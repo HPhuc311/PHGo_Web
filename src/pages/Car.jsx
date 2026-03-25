@@ -20,7 +20,7 @@ const Cars = () => {
                 setCars([])
                 setFilteredCars([])
             } finally {
-                setLoading(false) // 🔥 tắt loading
+                setLoading(false)
             }
         }
 
@@ -66,7 +66,7 @@ const Cars = () => {
                         <Spin size="large" />
                     </div>
                 ) : filteredCars.length === 0 ? (
-                    <Empty description="No cars found" />
+                    <Empty description="No cars found" style={{marginTop: 50}} />
                 ) : (
                     <Row gutter={[16, 16]} style={{marginTop: 30}}>
                         {filteredCars.map(car => (

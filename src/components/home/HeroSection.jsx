@@ -37,7 +37,7 @@ const HeroSection = () => {
                 </Title>
 
                 <Paragraph style={{ color: '#fff', fontSize: 16 }}>
-                    Experience the difference with over <span style={{ color: '#2ecc71' }}>10,000</span> modern family cars across Vietnam
+                    Experience the difference with over <span style={{ color: '#406093' }}>10,000</span> modern family cars across Vietnam
                 </Paragraph>
             </div>
         </div>
