@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import AdminUserTable from "../components/admin/AdminUserTable"
-import { getAllTrips, updateTripStatus } from "../services/tripServices"
+import { deleteTrip, getAllTrips, updateTripStatus } from "../services/tripServices"
 import { createCar, getCars, deleteCar, updateCar } from "../../src/services/carService"
 import { message, Modal, Select, Spin, Tabs } from "antd"
 import { buildImageUrl } from "../utils/image"
@@ -11,12 +11,13 @@ const AdminDashboard = () => {
     const [editingCar, setEditingCar] = useState(null)
     const [loading, setLoading] = useState(false)
 
+
     const [form, setForm] = useState({
         name: '',
         brand: '',
         location: '',
         price: '',
-        seats:'',
+        seats: '',
     })
 
     const [image, setImage] = useState(null)
@@ -28,8 +29,37 @@ const AdminDashboard = () => {
     }
 
     const handleChangeStatus = async (id, status) => {
-        await updateTripStatus(id, status)
-        fetchTrips()
+
+        // 🔥 nếu chọn cancel → confirm xoá
+        if (status === "cancelled") {
+            return Modal.confirm({
+                title: "Delete Trip?",
+                content: "This will permanently delete the trip ❗",
+                okText: "Yes, Delete",
+                okType: "danger",
+                cancelText: "Cancel",
+
+                onOk: async () => {
+                    try {
+                        await deleteTrip(id)
+                        message.success("Trip deleted successfully 🗑")
+                        fetchTrips()
+                    } catch (err) {
+                        console.log('err:', err)
+                        message.error("Delete failed ❌")
+                    }
+                }
+            })
+        }
+
+        // 🔥 các status khác giữ nguyên
+        try {
+            await updateTripStatus(id, status)
+            fetchTrips()
+        } catch (err) {
+            console.log('err:', err)
+            message.error("Update failed ❌")
+        }
     }
 
     const getStatusColor = (status) => {
@@ -124,6 +154,8 @@ const AdminDashboard = () => {
             </div>
         )
     }
+
+
 
     return (
         <div style={{ padding: 20, fontFamily: "Arial" }}>

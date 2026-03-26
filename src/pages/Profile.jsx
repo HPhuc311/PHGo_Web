@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { Card, Form, Input, Button, message } from 'antd'
+import { Card, Form, Input, Button, message, Modal } from 'antd'
 import { useAuth } from '../context/AuthContext'
 import { EditOutlined } from '@ant-design/icons'
 import fetchWithAuth from '../services/api'
@@ -15,9 +15,12 @@ const Profile = () => {
     const [preview, setPreview] = useState(null)
     const [file, setFile] = useState(null)
 
+    const [activeTab, setActiveTab] = useState('account')
 
+    const [showAddCard, setShowAddCard] = useState(false)
 
     const fileInputRef = useRef()
+
 
     useEffect(() => {
         if (!user) return
@@ -39,7 +42,7 @@ const Profile = () => {
         }
 
         fetchProfile()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user])
 
     if (!user) return <div>Please login</div>
@@ -102,6 +105,48 @@ const Profile = () => {
         setLoading(false)
     }
 
+    const handleAddCard = async (values) => {
+        try {
+            const res = await fetchWithAuth('/api/user/add-card', {
+                method: 'POST',
+                body: JSON.stringify(values)
+            })
+
+            // 🔥 UPDATE STATE NGAY
+            updateProfile({
+                ...user,
+                cards: res.cards
+            })
+
+            message.success("Card saved 💳")
+            setShowAddCard(false)
+
+        } catch (err) {
+            console.log('err:', err)
+            message.error("Failed to save card")
+        }
+    }
+
+    // const validateCard = (number) => {
+    //     const cleaned = number.replace(/\s+/g, '')
+    //     let sum = 0
+    //     let shouldDouble = false
+
+    //     for (let i = cleaned.length - 1; i >= 0; i--) {
+    //         let digit = parseInt(cleaned[i])
+
+    //         if (shouldDouble) {
+    //             digit *= 2
+    //             if (digit > 9) digit -= 9
+    //         }
+
+    //         sum += digit
+    //         shouldDouble = !shouldDouble
+    //     }
+
+    //     return sum % 10 === 0
+    // }
+
     return (
         <div style={{ display: 'flex', gap: 30, padding: 40 }}>
 
@@ -110,89 +155,154 @@ const Profile = () => {
                 <h2>Hello!</h2>
 
                 <div style={{ marginTop: 20, lineHeight: '40px' }}>
-                    <div>👤 My Account</div>
-                    <div>❤️ Favorite Cars</div>
-                    <div>🧾 My Trips</div>
-                    <div>🔒 Change Password</div>
+                    <div onClick={() => setActiveTab('account')}>👤 My Account</div>
+                    <div onClick={() => setActiveTab('payment')}>💳 Payment Methods</div>
+                    <div onClick={() => setActiveTab('trips')}>🧾 Change PassWord</div>
                 </div>
             </div>
 
+            <Modal
+                title="Add New Card"
+                open={showAddCard}
+                onCancel={() => setShowAddCard(false)}
+                footer={null}
+            >
+                <Form onFinish={handleAddCard} layout="vertical">
+
+                    <Form.Item name="number" label="Card Number" rules={[{ required: true }]}>
+                        <Input placeholder="1234 5678 9012 3456" />
+                    </Form.Item>
+
+                    <Form.Item name="expiry" label="Expiry">
+                        <Input placeholder="MM/YY" />
+                    </Form.Item>
+
+                    <Form.Item name="cvv" label="CVV">
+                        <Input.Password />
+                    </Form.Item>
+
+                    <Button type="primary" htmlType="submit" block>
+                        Save Card
+                    </Button>
+                </Form>
+            </Modal>
+
             {/* MAIN */}
-            <div style={{ flex: 1 }}>
-                <Card
-                    title="Account Information"
-                    extra={
-                        <Button
-                            icon={<EditOutlined />}
-                            onClick={() => setEditing(!editing)}
-                        >
-                            {editing ? 'Cancel' : 'Edit'}
-                        </Button>
-                    }
-                >
-
-                    {/* AVATAR */}
-                    <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                        <img
-                            src={avatarUrl}
-                            alt="avatar"
-                            onClick={handleAvatarClick}
-                            style={{
-                                width: 120,
-                                height: 120,
-                                borderRadius: '50%',
-                                cursor: editing ? 'pointer' : 'default'
-                            }}
-                        />
-
-                        {/* hidden input */}
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            style={{ display: 'none' }}
-                            onChange={handleSelectFile}
-                        />
-
-                        {editing && file && (
-                            <div style={{ marginTop: 10 }}>
-                                <Button onClick={handleUploadAvatar}>
-                                    Upload Avatar
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* FORM */}
-                    <Form form={form} layout="vertical" onFinish={handleUpdate}>
-                        <Form.Item name="name" label="Full Name">
-                            <Input disabled={!editing} />
-                        </Form.Item>
-
-                        <Form.Item name="email" label="Email">
-                            <Input disabled />
-                        </Form.Item>
-
-                        <Form.Item name="phone" label="Phone Number">
-                            <Input disabled={!editing} />
-                        </Form.Item>
-
-                        <Form.Item name="address" label="Address">
-                            <Input disabled={!editing} />
-                        </Form.Item>
-
-                        {editing && (
+            {activeTab === 'account' && (
+                <div style={{ flex: 1 }}>
+                    <Card
+                        title="Account Information"
+                        extra={
                             <Button
-                                type="primary"
-                                htmlType="submit"
-                                loading={loading}
-                                block
+                                icon={<EditOutlined />}
+                                onClick={() => setEditing(!editing)}
                             >
-                                Save Changes
+                                {editing ? 'Cancel' : 'Edit'}
                             </Button>
-                        )}
-                    </Form>
+                        }
+                    >
+
+                        {/* AVATAR */}
+                        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                            <img
+                                src={avatarUrl}
+                                alt="avatar"
+                                onClick={handleAvatarClick}
+                                style={{
+                                    width: 120,
+                                    height: 120,
+                                    borderRadius: '50%',
+                                    cursor: editing ? 'pointer' : 'default'
+                                }}
+                            />
+
+                            {/* hidden input */}
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                style={{ display: 'none' }}
+                                onChange={handleSelectFile}
+                            />
+
+                            {editing && file && (
+                                <div style={{ marginTop: 10 }}>
+                                    <Button onClick={handleUploadAvatar}>
+                                        Upload Avatar
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* FORM */}
+                        <Form form={form} layout="vertical" onFinish={handleUpdate}>
+                            <Form.Item name="name" label="Full Name">
+                                <Input disabled={!editing} />
+                            </Form.Item>
+
+                            <Form.Item name="email" label="Email">
+                                <Input disabled />
+                            </Form.Item>
+
+                            <Form.Item name="phone" label="Phone Number">
+                                <Input disabled={!editing} />
+                            </Form.Item>
+
+                            <Form.Item name="address" label="Address">
+                                <Input disabled={!editing} />
+                            </Form.Item>
+
+                            {editing && (
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    loading={loading}
+                                    block
+                                >
+                                    Save Changes
+                                </Button>
+                            )}
+                        </Form>
+                    </Card>
+                </div>
+            )}
+            {activeTab === 'payment' && (
+                <Card title="Payment Methods">
+
+                    <div style={{ display: "flex" }}>
+                        {/* LIST CARD */}
+                        {user.cards?.map((card, i) => (
+                            <div key={i}
+                                style={{
+                                    margin: 20,
+                                    padding: 16,
+                                    borderRadius: 12,
+                                    background: '#406093',
+                                    color: '#fff'
+                                }}>
+                                <h4>VISA</h4>
+                                <p>**** **** **** {card.last4}</p>
+                            </div>
+                        ))}
+
+                    </div>
+                    {/* ADD CARD */}
+                    <Button
+                        style={{
+                            margin: 20,
+                            width: 145,
+                            height:120,
+                            padding: 16,
+                            borderRadius: 12,
+                            background: '#406093',
+                            color: '#fff'
+                        }}
+                        type="primary"
+                        onClick={() => setShowAddCard(true)}
+                    >
+                        + Add New Card
+                    </Button>
                 </Card>
-            </div>
+            )}
         </div>
     )
 }

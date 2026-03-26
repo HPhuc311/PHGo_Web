@@ -35,16 +35,12 @@ const Register = () => {
                     <Input />
                 </Form.Item>
 
-                <Form.Item name="phone" label="Phone">
+                <Form.Item name="phone" label="Phone" rules={[{ required: true }]}>
                     <Input />
                 </Form.Item>
 
-                <Form.Item name="address" label="Address">
+                <Form.Item name="address" label="Address" rules={[{ required: true }]}>
                     <Input />
-                </Form.Item>
-
-                <Form.Item name="card" label="Credit Card">
-                    <Input placeholder="XXXX-XXXX-XXXX-XXXX" />
                 </Form.Item>
 
                 <Form.Item name="password" label="Password" rules={[{ required: true }]}>

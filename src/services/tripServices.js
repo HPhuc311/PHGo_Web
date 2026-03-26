@@ -1,4 +1,4 @@
-import API from './api'
+import API, { fetchWithAuth } from './api'
 
 export const createTrip = (data) => {
     return API('/api/trips', {
@@ -24,3 +24,10 @@ export const updateTripStatus = (id, status) =>
         method: 'PUT',
         body: JSON.stringify({ status })
     })
+
+export const deleteTrip = (id) => {
+    return fetchWithAuth(`/api/trips/${id}`, {
+        method: 'DELETE',
+        body: JSON.stringify({ status })
+    })
+}

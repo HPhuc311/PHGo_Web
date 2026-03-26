@@ -1,41 +1,47 @@
-import { Card, Radio, Button } from 'antd'
+import { Card, Radio, Button, Select, message } from 'antd'
+import { useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
 import dayjs from 'dayjs'
 
-const PaymentSection = ({ bookingData, onConfirm, loading }) => {
-    const pricePerDay = Number(bookingData?.car?.price || 0)
+const PaymentSection = ({ bookingData, onConfirm }) => {
+    const { user } = useAuth()
+    const [selectedCard, setSelectedCard] = useState(null)
 
-    // lấy thời gian
+    const pricePerDay = Number(bookingData?.car?.price || 0)
     const [start, end] = bookingData?.time || []
 
-    // tính số ngày (tối thiểu 1 ngày)
     const totalDays = start && end
-        ? Math.max(1, dayjs(end).diff(dayjs(start), 'day') + 1)
+        ? Math.ceil(dayjs(end).diff(dayjs(start), 'hour') / 24)
         : 1
 
-    // tổng tiền
     const totalPrice = pricePerDay * totalDays
+
+    const handlePay = () => {
+        if (!selectedCard) {
+            return message.error("Please select a card")
+        }
+
+        onConfirm(totalPrice, selectedCard)
+    }
 
     return (
         <Card title="Payment">
-            <p><b>Price / day:</b> {pricePerDay.toLocaleString()} VND</p>
-            <p><b>Total days:</b> {totalDays} day(s)</p>
 
-            <h3>
-                Total Price: {totalPrice.toLocaleString()} VND
-            </h3>
+            <p>Total: {totalPrice.toLocaleString()} VND</p>
 
-            <Radio.Group>
-                <Radio value="card">Credit Card</Radio>
-                <Radio value="paypal">PayPal</Radio>
-            </Radio.Group>
-
-            <Button
-                type="primary"
-                block
-                loading={loading}
-                style={{ marginTop: '20px' }}
-                onClick={() => onConfirm(totalPrice)} // 🔥 truyền đúng giá
+            <Select
+                placeholder="Select your card"
+                style={{ width: '100%' }}
+                onChange={setSelectedCard}
             >
+                {user.cards?.map((card, i) => (
+                    <Select.Option key={i} value={card.last4}>
+                        **** **** **** {card.last4}
+                    </Select.Option>
+                ))}
+            </Select>
+
+            <Button type="primary" block onClick={handlePay} style={{marginTop: 30}}>
                 Pay Now
             </Button>
         </Card>
