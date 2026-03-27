@@ -7,18 +7,17 @@ const PromotionSection = () => {
     const promotions = [
         {
             title: 'Holiday Deals - Book Early for the Best Cars',
-            image:
-                'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2',
+            image: '/images/1.png',
         },
         {
             title: 'Choose Your Style - Ride Your Mood',
             image:
-                'https://images.unsplash.com/photo-1494976388531-d1058494cdd8',
+                '/images/2.png',
         },
         {
             title: 'Book at the Right Time - Enjoy Great Discounts',
             image:
-                'https://images.unsplash.com/photo-1511919884226-fd3cad34687c',
+                '/images/3.png',
         },
     ]
 

@@ -50,6 +50,7 @@ const Booking = () => {
             {step === 1 && (
                 <Card title="Book Your Ride" variant="outlined">
                     <BookingForm
+                        car={selectedCar}
                         onNext={(data) => {
                             setBookingData({
                                 ...data,

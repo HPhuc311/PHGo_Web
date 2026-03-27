@@ -28,3 +28,17 @@ export const updateProfile = async (data) => {
 
 export const getAllUsers = () =>
     API('/api/user/all')
+
+
+export const updateUser = (id, data) => {
+    return API(`/api/user/${id}`, {
+        method: 'PUT',
+        body: data
+    })
+}
+
+export const deleteUser = (id) => {
+    return API(`/api/user/${id}`, {
+        method: 'DELETE'
+    })
+}
