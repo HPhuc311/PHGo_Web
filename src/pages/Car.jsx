@@ -24,7 +24,7 @@ const Cars = () => {
     const [maxPrice, setMaxPrice] = useState(0)
 
     const [tempFilter, setTempFilter] = useState({
-        priceRange: [0, 2000000],
+        priceRange: [0, maxPrice],
         brand: '',
         seats: '',
         sort: ''
