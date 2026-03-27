@@ -9,7 +9,7 @@ const PromoCard = ({ image, title }) => {
                     alt="promo"
                     src={image}
                     style={{
-                        height: '200px',
+                        height: '220px',
                         objectFit: 'cover',
                         borderRadius: '12px',
                     }}

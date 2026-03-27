@@ -9,27 +9,41 @@ const HeroSection = () => {
                 position: 'relative',
                 height: '420px',
                 borderRadius: '20px',
-                overflow: 'hidden',
-                backgroundImage:
-                    'url("https://images.unsplash.com/photo-1503376780353-7e6692767b70")',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
+                overflow: 'hidden', // Quan trọng để ngăn phần mờ tràn ra ngoài border-radius
             }}
         >
+            {/* Lớp nền hình ảnh (Áp dụng làm mờ ở đây) */}
             <div
                 style={{
                     position: 'absolute',
                     inset: 0,
-                    background: 'rgba(0,0,0,0.4)',
+                    backgroundImage: 'url("./images/page.jpg")',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'bottom',
+                    filter: 'blur(3px)', // Độ mờ: tăng số này nếu muốn mờ hơn
+                    transform: 'scale(1.1)', // Phóng to nhẹ để tránh các cạnh bị trắng do hiệu ứng blur
+                    zIndex: 0,
                 }}
             />
 
+            {/* Lớp phủ màu tối (Overlay) */}
+            <div
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'rgba(0, 0, 0, 0.43)',
+                    zIndex: 1,
+                }}
+            />
+
+            {/* Nội dung chữ (Giữ nguyên độ sắc nét) */}
             <div
                 style={{
                     position: 'relative',
                     textAlign: 'center',
                     top: '120px',
                     color: '#fff',
+                    zIndex: 2,
                 }}
             >
                 <Title style={{ color: '#fff' }}>
