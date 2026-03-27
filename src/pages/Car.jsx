@@ -24,13 +24,13 @@ const Cars = () => {
     const [maxPrice, setMaxPrice] = useState(0)
 
     const [tempFilter, setTempFilter] = useState({
-        priceRange: [0, maxPrice],
+        priceRange: [0, 0],
         brand: '',
         seats: '',
         sort: ''
     })
 
-    const [filter, setFilter] = useState(tempFilter)
+    const [filter, setFilter] = useState(null)
 
     // FETCH
     useEffect(() => {
@@ -44,6 +44,13 @@ const Cars = () => {
 
                 const max = Math.max(...list.map(c => Number(c.price) || 0))
                 setMaxPrice(max)
+
+                setTempFilter({
+                    priceRange: [0, max],
+                    brand: '',
+                    seats: '',
+                    sort: ''
+                })
             } catch (err) {
                 console.error(err)
                 setCars([])
@@ -58,6 +65,8 @@ const Cars = () => {
 
     // APPLY FILTER
     useEffect(() => {
+        if (!filter) return
+
         let result = [...cars]
 
         const { priceRange, brand, seats, sort } = filter
@@ -105,7 +114,8 @@ const Cars = () => {
         }
 
         setTempFilter(defaultFilter)
-        setFilter(defaultFilter)
+        setFilter(null)
+        setFilteredCars(cars)
     }
 
     return (

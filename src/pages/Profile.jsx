@@ -155,9 +155,9 @@ const Profile = () => {
                 <h2>Hello!</h2>
 
                 <div style={{ marginTop: 20, lineHeight: '40px' }}>
-                    <div onClick={() => setActiveTab('account')}>👤 My Account</div>
-                    <div onClick={() => setActiveTab('payment')}>💳 Payment Methods</div>
-                    <div onClick={() => setActiveTab('trips')}>🧾 Change PassWord</div>
+                    <div style={{ cursor: 'pointer' }} onClick={() => setActiveTab('account')}>👤 My Account</div>
+                    <div style={{ cursor: 'pointer' }} onClick={() => setActiveTab('payment')}>💳 Payment Methods</div>
+                    <div style={{ cursor: 'pointer' }} onClick={() => setActiveTab('trips')}>🧾 Change PassWord</div>
                 </div>
             </div>
 
