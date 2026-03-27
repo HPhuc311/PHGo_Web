@@ -1,10 +1,12 @@
 import { Spin } from 'antd'
 import { createContext, useContext, useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(undefined) // undefined = loading
+    const navigate = useNavigate()
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user')
@@ -31,8 +33,11 @@ export const AuthProvider = ({ children }) => {
     }
 
     const logout = () => {
+        localStorage.removeItem('token')   // 🔥 QUAN TRỌNG
+        localStorage.removeItem('user')    // 🔥 nên xoá luôn
         setUser(null)
-        localStorage.removeItem('user')
+
+        navigate('/login')
     }
 
     const updateProfile = (newData) => {

@@ -33,7 +33,7 @@ export const getAllUsers = () =>
 export const updateUser = (id, data) => {
     return API(`/api/user/${id}`, {
         method: 'PUT',
-        body: data
+        body: JSON.stringify(data)
     })
 }
 
