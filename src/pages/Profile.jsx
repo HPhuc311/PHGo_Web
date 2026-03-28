@@ -4,9 +4,11 @@ import { useAuth } from '../context/AuthContext'
 import { EditOutlined } from '@ant-design/icons'
 import fetchWithAuth from '../services/api'
 import { buildImageUrl } from '../utils/image'
+import { deleteCard} from '../services/userService'
 
 const Profile = () => {
     const [form] = Form.useForm()
+    const [cardForm] = Form.useForm()   
     const { user, updateProfile } = useAuth()
 
     const [editing, setEditing] = useState(false)
@@ -21,29 +23,32 @@ const Profile = () => {
 
     const fileInputRef = useRef()
 
+    const [cardType, setCardType] = useState('card')
 
     useEffect(() => {
-        if (!user) return
+        // 🔥 FETCH PROFILE
+        if (user) {
+            const fetchProfile = async () => {
+                try {
+                    const data = await fetchWithAuth('/api/user/profile')
 
-        const fetchProfile = async () => {
-            try {
-                const data = await fetchWithAuth('/api/user/profile')
-
-                form.setFieldsValue({
-                    name: data.name,
-                    email: data.email,
-                    phone: data.phone,
-                    address: data.address
-                })
-            } catch (err) {
-                console.error(err)
-                message.error('Failed to fetch user data')
+                    form.setFieldsValue({
+                        name: data.name,
+                        email: data.email,
+                        phone: data.phone,
+                        address: data.address
+                    })
+                } catch (err) {
+                    console.error(err)
+                    message.error('Failed to fetch user data')
+                }
             }
+
+            fetchProfile()
         }
 
-        fetchProfile()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user])
+
+    }, [user,form, cardForm])
 
     if (!user) return <div>Please login</div>
 
@@ -109,43 +114,88 @@ const Profile = () => {
         try {
             const res = await fetchWithAuth('/api/user/add-card', {
                 method: 'POST',
-                body: JSON.stringify(values)
+                body: JSON.stringify({
+                    ...values,
+                    brand: detectCardType(values.number), // 🔥 THÊM              //
+                })
             })
 
-            // 🔥 UPDATE STATE NGAY
             updateProfile({
                 ...user,
                 cards: res.cards
             })
 
-            message.success("Card saved 💳")
+            message.success("Card added 💳")
             setShowAddCard(false)
+            cardForm.resetFields()
+            setCardType('card')
 
-        } catch (err) {
-            console.log('err:', err)
-            message.error("Failed to save card")
+        } catch {
+            message.error("Add failed")
         }
     }
 
-    // const validateCard = (number) => {
-    //     const cleaned = number.replace(/\s+/g, '')
-    //     let sum = 0
-    //     let shouldDouble = false
+    // 🔥 FORMAT
+    const formatCardNumber = (value) => {
+        return value
+            .replace(/\D/g, '')
+            .replace(/(.{4})/g, '$1 ')
+            .trim()
+    }
 
-    //     for (let i = cleaned.length - 1; i >= 0; i--) {
-    //         let digit = parseInt(cleaned[i])
+    // 🔥 VALIDATE (LUHN)
+    const validateCardNumber = (number) => {
+        const cleaned = number.replace(/\s+/g, '')
 
-    //         if (shouldDouble) {
-    //             digit *= 2
-    //             if (digit > 9) digit -= 9
-    //         }
+        if (!/^\d{13,19}$/.test(cleaned)) return false
 
-    //         sum += digit
-    //         shouldDouble = !shouldDouble
-    //     }
+        let sum = 0
+        let shouldDouble = false
 
-    //     return sum % 10 === 0
-    // }
+        for (let i = cleaned.length - 1; i >= 0; i--) {
+            let digit = parseInt(cleaned[i])
+
+            if (shouldDouble) {
+                digit *= 2
+                if (digit > 9) digit -= 9
+            }
+
+            sum += digit
+            shouldDouble = !shouldDouble
+        }
+
+        return sum % 10 === 0
+    }
+
+    const handleDeleteCard = async (index) => {
+        Modal.confirm({
+            title: 'Delete this card?',
+            onOk: async () => {
+                try {
+                    const res = await deleteCard(index)
+
+                    updateProfile({
+                        ...user,
+                        cards: res.cards
+                    })
+
+                    message.success("Card deleted ❌")
+                } catch (err) {
+                    console.log(err)
+                    message.error("Delete failed")
+                }
+            }
+        })
+    }
+
+    const detectCardType = (number) => {
+        const cleaned = number.replace(/\s/g, '')
+
+        if (cleaned.startsWith('4')) return 'visa'
+        if (/^5[1-5]/.test(cleaned)) return 'mastercard'
+
+        return 'card'
+    }
 
     return (
         <div style={{ display: 'flex', gap: 30, padding: 40 }}>
@@ -169,15 +219,58 @@ const Profile = () => {
             >
                 <Form onFinish={handleAddCard} layout="vertical">
 
-                    <Form.Item name="number" label="Card Number" rules={[{ required: true }]}>
-                        <Input placeholder="1234 5678 9012 3456" />
+                    <Form.Item
+                        name="holder"
+                        label="Card Holder Name"
+                        rules={[{ required: true, message: 'Enter card holder name' }]}
+                    >
+                        <Input placeholder="Nguyen Van A" />
                     </Form.Item>
 
-                    <Form.Item name="expiry" label="Expiry">
+                    <Form.Item
+                        name="number"
+                        label="Card Number"
+                        rules={[
+                            { required: true, message: 'Please enter card number' },
+                            {
+                                validator: (_, value) => {
+                                    if (!value) return Promise.resolve()
+
+                                    if (!validateCardNumber(value)) {
+                                        return Promise.reject('Invalid card number ❌')
+                                    }
+
+                                    return Promise.resolve()
+                                }
+                            }
+                        ]}
+                    >
+                        <Input
+                            placeholder="1234 5678 9012 3456"
+                            maxLength={19}
+
+                            // 🔥 LOGO TRONG INPUT
+                            suffix={
+                                <span style={{ fontWeight: 600 }}>
+                                    {cardType === 'visa' && 'VISA'}
+                                    {cardType === 'mastercard' && 'MC'}
+                                </span>
+                            }
+
+                            onChange={(e) => {
+                                const formatted = formatCardNumber(e.target.value)
+                                cardForm.setFieldsValue({ number: formatted })
+
+                                setCardType(detectCardType(formatted))
+                            }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item name="expiry" label="Expiry" rules={[{ required: true, message: 'Enter your expiry' }]}>
                         <Input placeholder="MM/YY" />
                     </Form.Item>
 
-                    <Form.Item name="cvv" label="CVV">
+                    <Form.Item name="cvv" label="CVV" rules={[{ required: true, message: 'Enter your cvv' }]}>
                         <Input.Password />
                     </Form.Item>
 
@@ -266,41 +359,90 @@ const Profile = () => {
                 </div>
             )}
             {activeTab === 'payment' && (
-                <Card title="Payment Methods">
+                <Card title="Payment Methods" extra={
+                    <Button
+                        onClick={() => {
+                            cardForm.resetFields()
+                            setShowAddCard(true)
+                        }}
+                    >
+                        + Add Card
+                    </Button>
+                }>
 
-                    <div style={{ display: "flex" }}>
-                        {/* LIST CARD */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
+
                         {user.cards?.map((card, i) => (
                             <div key={i}
                                 style={{
-                                    margin: 20,
-                                    padding: 16,
-                                    borderRadius: 12,
-                                    background: '#406093',
-                                    color: '#fff'
+                                    width: 320,
+                                    height: 180,
+                                    borderRadius: 16,
+                                    padding: 20,
+                                    background: '#dbe2ea',
+                                    position: 'relative',
+                                    boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
                                 }}>
-                                <h4>VISA</h4>
-                                <p>**** **** **** {card.last4}</p>
+
+                                {/* HEADER */}
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    fontWeight: 600
+                                }}>
+                                    <span style={{ color: '#1a3d7c' }}>
+                                        {card.brand === 'Visa' && 'VISA'}
+                                        {card.brand === 'Mastercard' && 'MASTERCARD'}
+                                    </span>
+
+                                    <span style={{ fontSize: 12 }}>
+                                        CREDIT
+                                    </span>
+                                </div>
+
+                                {/* CARD NUMBER */}
+                                <div style={{
+                                    marginTop: 20,
+                                    fontSize: 20,
+                                    letterSpacing: 2,
+                                    fontWeight: 500
+                                }}>
+                                    **** **** **** {card.last4}
+                                </div>
+
+                                {/* NAME */}
+                                <div style={{
+                                    marginTop: 15,
+                                    fontSize: 13,
+                                    textTransform: 'uppercase'
+                                }}>
+                                    {card.holder}
+                                </div>
+
+                                {/* EXPIRY */}
+                                <div style={{
+                                    marginTop: 5,
+                                    fontSize: 12
+                                }}>
+                                    {card.expiry}
+                                </div>
+
+                                {/* DELETE BUTTON */}
+                                <div style={{
+                                    position: 'absolute',
+                                    bottom: 10,
+                                    right: 10,
+                                    cursor: 'pointer',
+                                    fontSize: 16
+                                }}
+                                    onClick={() => handleDeleteCard(i)}
+                                >
+                                    🗑️
+                                </div>
+
                             </div>
                         ))}
-
                     </div>
-                    {/* ADD CARD */}
-                    <Button
-                        style={{
-                            margin: 20,
-                            width: 145,
-                            height:120,
-                            padding: 16,
-                            borderRadius: 12,
-                            background: '#406093',
-                            color: '#fff'
-                        }}
-                        type="primary"
-                        onClick={() => setShowAddCard(true)}
-                    >
-                        + Add New Card
-                    </Button>
                 </Card>
             )}
         </div>

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import API from './api'
+import API, { fetchWithAuth } from './api'
 
 const API_URL = import.meta.env.VITE_API_URL + '/api/user'
 
@@ -39,6 +39,19 @@ export const updateUser = (id, data) => {
 
 export const deleteUser = (id) => {
     return API(`/api/user/${id}`, {
+        method: 'DELETE'
+    })
+}
+
+export const updateCard = (index, data) => {
+    return fetchWithAuth(`/api/user/card/${index}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+    })
+}
+
+export const deleteCard = (index) => {
+    return fetchWithAuth(`/api/user/card/${index}`, {
         method: 'DELETE'
     })
 }

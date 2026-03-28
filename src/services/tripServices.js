@@ -1,7 +1,7 @@
 import API, { fetchWithAuth } from './api'
 
 export const createTrip = (data) => {
-    return API('/api/trips', {
+    return fetchWithAuth('/api/trips', {
         method: 'POST',
         body: JSON.stringify(data),
     })
