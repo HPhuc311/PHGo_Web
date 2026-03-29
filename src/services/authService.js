@@ -19,3 +19,16 @@ export const loginAPI = async (data) => {
 
     return res.json()
 }
+
+export const changePasswordAPI = async (data) => {
+    const res = await fetch(`${API_URL}/change-password`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(data)
+    })
+
+    return res.json()
+}

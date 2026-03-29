@@ -4,12 +4,13 @@ import { useAuth } from '../context/AuthContext'
 import { EditOutlined } from '@ant-design/icons'
 import fetchWithAuth from '../services/api'
 import { buildImageUrl } from '../utils/image'
-import { deleteCard} from '../services/userService'
+import { deleteCard } from '../services/userService'
+import { changePasswordAPI } from '../services/authService'
 
 const Profile = () => {
     const [form] = Form.useForm()
-    const [cardForm] = Form.useForm()   
-    const { user, updateProfile } = useAuth()
+    const [cardForm] = Form.useForm()
+    const { user, updateProfile, logout } = useAuth()
 
     const [editing, setEditing] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -24,6 +25,9 @@ const Profile = () => {
     const fileInputRef = useRef()
 
     const [cardType, setCardType] = useState('card')
+
+    const [passwordLoading, setPasswordLoading] = useState(false)
+
 
     useEffect(() => {
         // 🔥 FETCH PROFILE
@@ -48,7 +52,7 @@ const Profile = () => {
         }
 
 
-    }, [user,form, cardForm])
+    }, [user, form, cardForm])
 
     if (!user) return <div>Please login</div>
 
@@ -197,6 +201,44 @@ const Profile = () => {
         return 'card'
     }
 
+    const handleChangePassword = async (values) => {
+        Modal.confirm({
+            title: "Change password?",
+            content: "You will be logged out after this action",
+            okText: "Yes",
+            cancelText: "Cancel",
+
+            onOk: async () => {
+                setPasswordLoading(true)
+
+                try {
+                    const res = await changePasswordAPI(values)
+
+                    if (res.message.toLowerCase().includes('success')) {
+
+                        message.success("Password changed successfully 🔐")
+
+                        // 👉 message bảo mật (đặt ở đây luôn)
+                        message.info("For security reasons, please login again")
+
+                        setTimeout(() => {
+                            logout()
+                        }, 1000)
+
+                    } else {
+                        message.error(res.message)
+                    }
+
+                } catch (err) {
+                    message.error(err.message || "Change password failed ❌")
+                }
+
+                setPasswordLoading(false)
+            }
+        })
+    }
+
+
     return (
         <div style={{ display: 'flex', gap: 30, padding: 40 }}>
 
@@ -207,7 +249,7 @@ const Profile = () => {
                 <div style={{ marginTop: 20, lineHeight: '40px' }}>
                     <div style={{ cursor: 'pointer' }} onClick={() => setActiveTab('account')}>👤 My Account</div>
                     <div style={{ cursor: 'pointer' }} onClick={() => setActiveTab('payment')}>💳 Payment Methods</div>
-                    <div style={{ cursor: 'pointer' }} onClick={() => setActiveTab('trips')}>🧾 Change PassWord</div>
+                    <div style={{ cursor: 'pointer' }} onClick={() => setActiveTab('password')}> 🔐 Change Password </div>
                 </div>
             </div>
 
@@ -443,6 +485,60 @@ const Profile = () => {
                             </div>
                         ))}
                     </div>
+                </Card>
+            )}
+            {activeTab === 'password' && (
+                <Card title="Change Password">
+                    <Form layout="vertical" onFinish={handleChangePassword}>
+
+                        <Form.Item
+                            name="oldPassword"
+                            label="Current Password"
+                            rules={[{ required: true, message: 'Enter current password' }]}
+                        >
+                            <Input.Password />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="newPassword"
+                            label="New Password"
+                            rules={[
+                                { required: true, message: 'Enter new password' },
+                                { min: 8, message: 'Minimum 8 characters' }
+                            ]}
+                        >
+                            <Input.Password />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="confirmPassword"
+                            label="Confirm Password"
+                            dependencies={['newPassword']}
+                            rules={[
+                                { required: true, message: 'Confirm password' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || getFieldValue('newPassword') === value) {
+                                            return Promise.resolve()
+                                        }
+                                        return Promise.reject("Passwords do not match ❌")
+                                    }
+                                })
+                            ]}
+                        >
+                            <Input.Password />
+                        </Form.Item>
+
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={passwordLoading}
+                            block
+                        >
+                            Update Password
+                        </Button>
+
+                    </Form>
                 </Card>
             )}
         </div>

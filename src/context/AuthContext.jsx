@@ -33,10 +33,9 @@ export const AuthProvider = ({ children }) => {
     }
 
     const logout = () => {
-        localStorage.removeItem('token')   // 🔥 QUAN TRỌNG
-        localStorage.removeItem('user')    // 🔥 nên xoá luôn
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
         setUser(null)
-
         navigate('/login')
     }
 
