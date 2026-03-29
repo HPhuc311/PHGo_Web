@@ -69,10 +69,6 @@ const AdminUserTable = () => {
             dataIndex: 'email'
         },
         {
-            title: 'Phone',
-            dataIndex: 'phone'
-        },
-        {
             title: 'Role',
             dataIndex: 'role'
         },
