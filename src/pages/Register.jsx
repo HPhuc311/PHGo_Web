@@ -27,29 +27,89 @@ const Register = () => {
         <Card title="Register" style={{ maxWidth: 500, margin: 'auto' }}>
             <Form layout="vertical" onFinish={handleRegister}>
 
-                <Form.Item name="name" label="Full Name" rules={[{ required: true }]}>
-                    <Input />
+                <Form.Item
+                    label="Full Name"
+                    name="name"
+                    rules={[
+                        { required: true, message: "Name is required" },
+                        { min: 2, message: "Name must be at least 2 characters" }
+                    ]}
+                >
+                    <Input placeholder="Enter your name" />
                 </Form.Item>
 
-                <Form.Item name="email" label="Email" rules={[{ required: true }]}>
-                    <Input />
+                {/* EMAIL */}
+                <Form.Item
+                    label="Email"
+                    name="email"
+                    rules={[
+                        { required: true, message: "Email is required" },
+                        { type: "email", message: "Invalid email format" }
+                    ]}
+                >
+                    <Input placeholder="Enter your email" />
                 </Form.Item>
 
-                <Form.Item name="phone" label="Phone" rules={[{ required: true }]}>
-                    <Input />
+                {/* PHONE */}
+                <Form.Item
+                    label="Phone"
+                    name="phone"
+                    rules={[
+                        { required: true, message: "Phone is required" },
+                        {
+                            pattern: /^(0|\+84)[0-9]{9}$/,
+                            message: "Invalid Vietnamese phone number"
+                        }
+                    ]}
+                >
+                    <Input placeholder="Enter your phone" />
                 </Form.Item>
 
-                <Form.Item name="address" label="Address" rules={[{ required: true }]}>
-                    <Input />
+                {/* PASSWORD */}
+                <Form.Item
+                    label="Password"
+                    name="password"
+                    rules={[
+                        { required: true, message: "Password is required" },
+                        { min: 8, message: "Minimum 8 characters" },
+                        {
+                            pattern: /^(?=.*[A-Z])(?=.*\d).+$/,
+                            message: "Must include uppercase letter and number"
+                        }
+                    ]}
+                    hasFeedback
+                >
+                    <Input.Password placeholder="Enter password" />
                 </Form.Item>
 
-                <Form.Item name="password" label="Password" rules={[{ required: true }]}>
-                    <Input.Password />
+                {/* CONFIRM PASSWORD */}
+                <Form.Item
+                    label="Confirm Password"
+                    name="confirmPassword"
+                    dependencies={['password']}
+                    hasFeedback
+                    rules={[
+                        { required: true, message: "Please confirm password" },
+                        ({ getFieldValue }) => ({
+                            validator(_, value) {
+                                if (!value || getFieldValue('password') === value) {
+                                    return Promise.resolve()
+                                }
+                                return Promise.reject("Passwords do not match ❌")
+                            }
+                        })
+                    ]}
+                >
+                    <Input.Password placeholder="Confirm password" />
                 </Form.Item>
- 
-                <Button type="primary" htmlType="submit" block>
-                    Register
-                </Button>
+
+                {/* SUBMIT */}
+                <Form.Item>
+                    <Button type="primary" htmlType="submit" block>
+                        Register
+                    </Button>
+                </Form.Item>
+
             </Form>
         </Card>
     )
