@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import dayjs from 'dayjs'
 
-const PaymentSection = ({ bookingData, onConfirm }) => {
+const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
     const { user } = useAuth()
     const [selectedCard, setSelectedCard] = useState(null)
 
@@ -44,6 +44,16 @@ const PaymentSection = ({ bookingData, onConfirm }) => {
             <Button type="primary" block onClick={handlePay} style={{marginTop: 30}}>
                 Pay Now
             </Button>
+
+            {bookingError && (
+                <Button
+                    style={{ marginTop: 10 }}
+                    block
+                    onClick={onBack}
+                >
+                    ← Back to Booking
+                </Button>
+            ) }
         </Card>
     )
 }

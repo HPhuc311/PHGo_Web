@@ -8,7 +8,6 @@ export const fetchWithAuth = async (url, options = {}) => {
         Authorization: token ? `Bearer ${token}` : ''
     }
 
-    // 👉 CHỈ set JSON nếu KHÔNG phải FormData
     if (!(options.body instanceof FormData)) {
         headers['Content-Type'] = 'application/json'
     }
@@ -19,6 +18,12 @@ export const fetchWithAuth = async (url, options = {}) => {
     })
 
     const data = await res.json()
+
+    // 🔥 QUAN TRỌNG
+    if (!res.ok) {
+        throw new Error(data.message || "Request failed")
+    }
+
     return data
 }
 

@@ -1,5 +1,6 @@
 import { Card, Button, Tag, Modal } from 'antd'
 import { cancelTrip } from '../../services/tripServices'
+import dayjs from 'dayjs'
 
 const TripCard = ({ trip }) => {
 
@@ -65,7 +66,10 @@ const TripCard = ({ trip }) => {
             </p>
 
             <p>
-                <b>Date:</b> {trip.date || 'N/A'}
+                <b>Date:</b>{" "}
+                {dayjs(trip.startTime).format("DD/MM/YYYY HH:mm")}
+                {" → "}
+                {dayjs(trip.endTime).format("DD/MM/YYYY HH:mm")}
             </p>
 
             <p><b>Service:</b> {trip.service}</p>

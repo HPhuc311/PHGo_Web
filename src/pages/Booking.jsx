@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card } from 'antd'
+import { Card, message } from 'antd'
 import BookingForm from '../components/booking/BookingForm'
 import PaymentSection from '../components/booking/PaymentSection'
 import Receipt from '../components/booking/Receipt'
@@ -13,6 +13,7 @@ const Booking = () => {
     const [price, setPrice] = useState(0)
     const location = useLocation()
     const selectedCar = location.state?.car
+    const [bookingError, setBookingError] = useState(null)
 
     const handleConfirm = async (totalPrice) => {
         if (!bookingData || !selectedCar) return
@@ -20,29 +21,42 @@ const Booking = () => {
         try {
             const [start, end] = bookingData.time || []
 
+            if (!start || !end) {
+                alert("Please select date & time ❌")
+                return
+            }
+
             const newTrip = {
-                car: selectedCar._id, // lưu id
-                carName: selectedCar.name, // ✅ lưu tên để hiển thị
+                car: selectedCar._id,
+                carName: selectedCar.name,
 
                 pickup: bookingData.pickup,
                 destination: bookingData.destination,
 
-                date: `${start?.format('DD-MM-YYYY HH:mm')} - ${end?.format('DD-MM-YYYY HH:mm')}`,
+                // 🔥 QUAN TRỌNG
+                startTime: start.toISOString(),
+                endTime: end.toISOString(),
 
                 passengers: bookingData.passengers,
-                price: totalPrice, // lấy từ xe
+                price: totalPrice,
                 service: bookingData.service,
             }
 
+            setBookingError(null)
             await createTrip(newTrip)
-
             setPrice(totalPrice)
             setStep(3)
-
+            
         } catch (err) {
-            console.error(err)
-            alert('Booking failed')
+            setBookingError(err.message)
+            message.error(
+                err?.message || "This time slot is already booked ❌"
+            )
         }
+    }
+
+    const handleBack = () => {
+        setStep(1)
     }
 
     return (
@@ -65,8 +79,10 @@ const Booking = () => {
 
             {step === 2 && bookingData && (
                 <PaymentSection
+                    bookingError={bookingError}
                     bookingData={bookingData}
                     onConfirm={handleConfirm}
+                    onBack={handleBack}
                 />
             )}
 
