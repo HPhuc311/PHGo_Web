@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
     Row,
-    Col,
     Spin,
     Empty,
     Slider,
@@ -9,7 +8,8 @@ import {
     Select,
     Button,
     Card,
-    Space
+    Space,
+    Col
 } from 'antd'
 import { getCars } from '../services/carService'
 import CarCard from '../components/car/CarCard'
@@ -113,7 +113,7 @@ const Cars = () => {
     return (
         <div style={{ padding: 20 }}>
 
-            {/* 🔥 FILTER NGANG */}
+            {/* FILTER NGANG */}
             <Card
                 style={{
                     borderRadius: 12,
@@ -181,7 +181,7 @@ const Cars = () => {
                         <Select.Option value="high">Price ↓</Select.Option>
                     </Select>
 
-                    {/* 🔥 SLIDER GỌN */}
+                    {/* SLIDER GỌN */}
                     <div style={{ width: 220 }}>
                         <Slider
                             min={0}
@@ -212,7 +212,7 @@ const Cars = () => {
                 </div>
             </Card>
 
-            {/* 🔥 CAR LIST */}
+            {/* CAR LIST */}
             <Text strong>{filteredCars.length} cars found</Text>
 
             {loading ? (
@@ -220,21 +220,17 @@ const Cars = () => {
                     <Spin size="large" />
                 </div>
             ) : filteredCars.length === 0 ? (
-                <Empty description="No cars found 😢" style={{ marginTop: 50 }} />
+                <Empty description="No cars found" style={{ marginTop: 50 }} />
             ) : (
-                <Row gutter={[20, 20]}>
-                    {filteredCars.map(car => (
-                        <div
-                            key={car._id}
-                            style={{
-                                width: '20%', // 🔥 1 hàng 5 card
-                                padding: '10px'
-                            }}
-                        >
-                            <CarCard car={car} />
-                        </div>
-                    ))}
-                </Row>
+                        <Row gutter={[24, 24]}>
+                            {filteredCars.map(car => (
+                                <Col span={6} key={car._id}>
+                                    <div style={{ height: '100%' }}> {/* 🔥 thêm wrapper */}
+                                        <CarCard car={car} />
+                                    </div>
+                                </Col>
+                            ))}
+                        </Row>
             )}
 
         </div>

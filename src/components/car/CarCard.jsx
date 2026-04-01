@@ -11,41 +11,64 @@ const CarCard = ({ car }) => {
             onClick={() => navigate(`/cars/${car._id}`)}
             style={{
                 borderRadius: '16px',
+                height: '100%', // 🔥 QUAN TRỌNG
                 display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden'
+                flexDirection: 'column'
             }}
             cover={
-                <div style={{ height: '180px', overflow: 'hidden' }}>
+                <div style={{ height: 160, overflow: 'hidden' }}>
                     <img
                         src={buildImageUrl(car.image)}
                         alt={car.name}
                         style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover"
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
                         }}
                     />
                 </div>
             }
             bodyStyle={{
-                padding: '16px'
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
             }}
         >
-            <h4 style={{ marginBottom: 8 }}>{car.name}</h4>
+            <div>
+                {/* TITLE FIX */}
+                <h4 style={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    minHeight: 44
+                }}>
+                    {car.name}
+                </h4>
 
-            <p style={{ marginBottom: 8, color: '#666' }}>
-                📍 {car.location}
-            </p>
+                {/* LOCATION */}
+                <p style={{ marginBottom: 6, color: '#666' }}>
+                    📍 {car.location}
+                </p>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>⭐ {car.rating}</span>
-                <span style={{ color: '#406093', fontWeight: 'bold' }}>
-                    {Number(car.price).toLocaleString()}đ/day
-                </span>
+                {/* PRICE */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: 6
+                }}>
+                    <span>⭐ {car.rating}</span>
+                    <span style={{ color: '#406093', fontWeight: 'bold' }}>
+                        {Number(car.price).toLocaleString()}đ/day
+                    </span>
+                </div>
             </div>
 
-            <p style={{ marginTop: 8 }}>{car.seats} seats</p>
+            {/* FOOTER LUÔN Ở DƯỚI */}
+            <div>
+                <p style={{ margin: 0 }}>{car.seats} seats</p>
+            </div>
         </Card>
     )
 }
