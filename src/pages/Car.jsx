@@ -53,8 +53,6 @@ const Cars = () => {
                 })
             } catch (err) {
                 console.error(err)
-                setCars([])
-                setFilteredCars([])
             } finally {
                 setLoading(false)
             }
@@ -71,39 +69,33 @@ const Cars = () => {
 
         const { priceRange, brand, seats, sort } = filter
 
-        // PRICE
         result = result.filter(car => {
             const price = Number(car.price)
             return price >= priceRange[0] && price <= priceRange[1]
         })
 
-        // BRAND
         if (brand) {
             result = result.filter(car =>
                 car.brand?.toLowerCase().includes(brand.toLowerCase())
             )
         }
 
-        // SEATS
         if (seats) {
             result = result.filter(car =>
                 Number(car.seats) === Number(seats)
             )
         }
 
-        // SORT
         if (sort === 'low') {
-            result.sort((a, b) => Number(a.price) - Number(b.price))
+            result.sort((a, b) => a.price - b.price)
         } else if (sort === 'high') {
-            result.sort((a, b) => Number(b.price) - Number(a.price))
+            result.sort((a, b) => b.price - a.price)
         }
 
         setFilteredCars(result)
     }, [filter, cars])
 
-    const handleApply = () => {
-        setFilter(tempFilter)
-    }
+    const handleApply = () => setFilter(tempFilter)
 
     const handleReset = () => {
         const defaultFilter = {
@@ -120,122 +112,131 @@ const Cars = () => {
 
     return (
         <div style={{ padding: 20 }}>
-            <Row gutter={20}>
 
-                {/* 🔥 SIDEBAR */}
-                <Col span={6}>
-                    <Card title="Filter" style={{ borderRadius: 12 }}>
-                        <Space direction="vertical" style={{ width: '100%' }}>
+            {/* 🔥 FILTER NGANG */}
+            <Card
+                style={{
+                    borderRadius: 12,
+                    marginBottom: 16,
+                    padding: '10px 16px'
+                }}
+                bodyStyle={{ padding: 0 }}
+            >
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: 12,
+                        flexWrap: 'wrap'
+                    }}
+                >
 
-                            {/* BRAND */}
-                            <div>
-                                <Text strong>Brand</Text>
-                                <Select
-                                    style={{ width: '100%', marginTop: 5 }}
-                                    allowClear
-                                    value={tempFilter.brand}
-                                    onChange={(val) =>
-                                        setTempFilter(prev => ({ ...prev, brand: val }))
-                                    }
-                                >
-                                    {[...new Set(cars.map(c => c.brand))].map(b => (
-                                        <Select.Option key={b} value={b}>
-                                            {b}
-                                        </Select.Option>
-                                    ))}
-                                </Select>
-                            </div>
+                    {/* BRAND */}
+                    <Select
+                        placeholder="Brand"
+                        allowClear
+                        size="middle"
+                        style={{ width: 140 }}
+                        value={tempFilter.brand}
+                        onChange={(val) =>
+                            setTempFilter(prev => ({ ...prev, brand: val }))
+                        }
+                    >
+                        {[...new Set(cars.map(c => c.brand))].map(b => (
+                            <Select.Option key={b} value={b}>
+                                {b}
+                            </Select.Option>
+                        ))}
+                    </Select>
 
-                            {/* SEATS */}
-                            <div>
-                                <Text strong>Seats</Text>
-                                <Select
-                                    style={{ width: '100%', marginTop: 5 }}
-                                    allowClear
-                                    value={tempFilter.seats}
-                                    onChange={(val) =>
-                                        setTempFilter(prev => ({ ...prev, seats: val }))
-                                    }
-                                >
-                                    <Select.Option value="4">4 seats</Select.Option>
-                                    <Select.Option value="5">5 seats</Select.Option>
-                                    <Select.Option value="7">7 seats</Select.Option>
-                                </Select>
-                            </div>
+                    {/* SEATS */}
+                    <Select
+                        placeholder="Seats"
+                        allowClear
+                        size="middle"
+                        style={{ width: 120 }}
+                        value={tempFilter.seats}
+                        onChange={(val) =>
+                            setTempFilter(prev => ({ ...prev, seats: val }))
+                        }
+                    >
+                        <Select.Option value="4">4 seats</Select.Option>
+                        <Select.Option value="5">5 seats</Select.Option>
+                        <Select.Option value="7">7 seats</Select.Option>
+                    </Select>
 
-                            {/* SORT */}
-                            <div>
-                                <Text strong>Sort</Text>
-                                <Select
-                                    style={{ width: '100%', marginTop: 5 }}
-                                    allowClear
-                                    value={tempFilter.sort}
-                                    onChange={(val) =>
-                                        setTempFilter(prev => ({ ...prev, sort: val }))
-                                    }
-                                >
-                                    <Select.Option value="low">Price: Low → High</Select.Option>
-                                    <Select.Option value="high">Price: High → Low</Select.Option>
-                                </Select>
-                            </div>
+                    {/* SORT */}
+                    <Select
+                        placeholder="Sort"
+                        allowClear
+                        size="middle"
+                        style={{ width: 140 }}
+                        value={tempFilter.sort}
+                        onChange={(val) =>
+                            setTempFilter(prev => ({ ...prev, sort: val }))
+                        }
+                    >
+                        <Select.Option value="low">Price ↑</Select.Option>
+                        <Select.Option value="high">Price ↓</Select.Option>
+                    </Select>
 
-                            {/* PRICE */}
-                            <div>
-                                <Text strong>Price Range</Text>
-                                <Slider
-                                    min={0}
-                                    max={maxPrice}
-                                    step={50000}
-                                    value={tempFilter.priceRange[1]}
-                                    onChange={(val) =>
-                                        setTempFilter(prev => ({
-                                            ...prev,
-                                            priceRange: [0, val]
-                                        }))
-                                    }
-                                />
-
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                    Up to {tempFilter.priceRange[1].toLocaleString()} VND
-                                </div>
-                            </div>
-
-                            {/* BUTTON */}
-                            <Space style={{ marginTop: 10 }}>
-                                <Button onClick={handleReset}>
-                                    Reset
-                                </Button>
-                                <Button type="primary" onClick={handleApply}>
-                                    Lọc
-                                </Button>
-                            </Space>
-
-                        </Space>
-                    </Card>
-                </Col>
-
-                {/* 🔥 CAR LIST */}
-                <Col span={18}>
-                    <Text>{filteredCars.length} cars found</Text>
-
-                    {loading ? (
-                        <div style={{ textAlign: 'center', marginTop: 50 }}>
-                            <Spin size="large" />
+                    {/* 🔥 SLIDER GỌN */}
+                    <div style={{ width: 220 }}>
+                        <Slider
+                            min={0}
+                            max={maxPrice}
+                            step={50000}
+                            value={tempFilter.priceRange[1]}
+                            onChange={(val) =>
+                                setTempFilter(prev => ({
+                                    ...prev,
+                                    priceRange: [0, val]
+                                }))
+                            }
+                        />
+                        <div style={{ fontSize: 12, textAlign: 'center' }}>
+                            ≤ {tempFilter.priceRange[1].toLocaleString()} VND
                         </div>
-                    ) : filteredCars.length === 0 ? (
-                        <Empty description="No cars found 😢" style={{ marginTop: 50 }} />
-                    ) : (
-                        <Row gutter={[16, 16]} style={{ marginTop: 10 }}>
-                            {filteredCars.map(car => (
-                                <Col span={8} key={car._id}>
-                                    <CarCard car={car} />
-                                </Col>
-                            ))}
-                        </Row>
-                    )}
-                </Col>
+                    </div>
 
-            </Row>
+                    {/* BUTTON */}
+                    <Button size="middle" onClick={handleReset}>
+                        Reset
+                    </Button>
+
+                    <Button size="middle" type="primary" onClick={handleApply}>
+                        Apply
+                    </Button>
+
+                </div>
+            </Card>
+
+            {/* 🔥 CAR LIST */}
+            <Text strong>{filteredCars.length} cars found</Text>
+
+            {loading ? (
+                <div style={{ textAlign: 'center', marginTop: 50 }}>
+                    <Spin size="large" />
+                </div>
+            ) : filteredCars.length === 0 ? (
+                <Empty description="No cars found 😢" style={{ marginTop: 50 }} />
+            ) : (
+                <Row gutter={[20, 20]}>
+                    {filteredCars.map(car => (
+                        <div
+                            key={car._id}
+                            style={{
+                                width: '20%', // 🔥 1 hàng 5 card
+                                padding: '10px'
+                            }}
+                        >
+                            <CarCard car={car} />
+                        </div>
+                    ))}
+                </Row>
+            )}
+
         </div>
     )
 }
