@@ -183,7 +183,7 @@ const AdminDashboard = () => {
 
     return (
         <div style={{ padding: 20, fontFamily: "Arial" }}>
-            <h1>🚀 Admin Dashboard</h1>
+            <h1>Admin Dashboard</h1>
 
             {/* STATS */}
             <div style={{ display: "flex", gap: 20, marginBottom: 20 }}>
