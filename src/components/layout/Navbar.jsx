@@ -8,8 +8,6 @@ const Navbar = () => {
     const navigate = useNavigate()
     const { user, logout } = useAuth()
 
-    const API_URL = import.meta.env.VITE_API_URL
-
     const dropdownItems = [
         {
             key: 'profile',

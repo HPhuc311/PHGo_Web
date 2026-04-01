@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import AdminUserTable from "../components/admin/AdminUserTable"
 import { deleteTrip, getAllTrips, updateTripStatus } from "../services/tripServices"
 import { createCar, getCars, deleteCar, updateCar } from "../../src/services/carService"
-import { message, Modal, Select, Spin, Tabs } from "antd"
+import { Form, Input, InputNumber, Upload, Button, Card, Row, Col, message, Modal, Tabs, Spin, Select } from "antd"
 import { buildImageUrl } from "../utils/image"
 
 const AdminDashboard = () => {
@@ -11,17 +11,19 @@ const AdminDashboard = () => {
     const [editingCar, setEditingCar] = useState(null)
     const [loading, setLoading] = useState(false)
     
+    const [antdForm] = Form.useForm()
 
+    const [openModal, setOpenModal] = useState(false)
 
-    const [form, setForm] = useState({
-        name: '',
-        brand: '',
-        location: '',
-        price: '',
-        seats: '',
-    })
+    // const [form, setForm] = useState({
+    //     name: '',
+    //     brand: '',
+    //     location: '',
+    //     price: '',
+    //     seats: '',
+    // })
 
-    const [image, setImage] = useState(null)
+    // const [image, setImage] = useState(null)
 
     // ================= TRIPS =================
     const fetchTrips = async () => {
@@ -91,41 +93,52 @@ const AdminDashboard = () => {
         fetchCars()
     }, [])
 
-    useEffect(() => {
-        if (editingCar) {
-            setForm(editingCar)
-        }
-    }, [editingCar])
+    // useEffect(() => {
+    //     if (editingCar) {
+    //         setForm(editingCar)
+    //     }
+    // }, [editingCar])
 
-    const handleSubmitCar = async () => {
+    const handleSubmitCar = async (values) => {
         const formData = new FormData()
 
-        Object.keys(form).forEach(key => {
-            formData.append(key, form[key])
+        Object.keys(values).forEach(key => {
+            if (key !== "image") {
+                formData.append(key, values[key])
+            }
         })
 
-        if (image) {
-            formData.append("image", image)
+        if (values.image?.[0]?.originFileObj) {
+            formData.append("image", values.image[0].originFileObj)
         }
 
         try {
+            let updatedCar
+
             if (editingCar) {
-                await updateCar(editingCar._id, formData)
-                message.success("Car updated successfully 🚗")
+                updatedCar = await updateCar(editingCar._id, formData)
+
+                // 🔥 update UI ngay
+                setCars(prev =>
+                    prev.map(c =>
+                        c._id === editingCar._id ? updatedCar : c
+                    )
+                )
+
+                message.success("Car updated 🚗")
             } else {
-                await createCar(formData)
-                message.success("Car created successfully 🚀")
+                const newCar = await createCar(formData)
+
+                setCars(prev => [newCar, ...prev])
+                message.success("Car created 🚀")
             }
 
-            setForm({ name: '', brand: '', location: '', price: '', seats: '' })
-            setImage(null)
+            // 🔥 reset form
+            antdForm.resetFields()
             setEditingCar(null)
-            fetchCars()
+
         } catch (err) {
-            console.log('err:', err)
-            message.error("Something went wrong ❌")
-        } finally {
-            setLoading(false)
+            message.error(err.message || "Error ❌")
         }
     }
 
@@ -136,13 +149,23 @@ const AdminDashboard = () => {
             okText: "Yes",
             cancelText: "Cancel",
             okType: "danger",
+
             onOk: async () => {
                 try {
+                    // 🔥 XOÁ NGAY TRÊN UI
+                    setCars(prev => prev.filter(car => car._id !== id))
+
+                    // 🔥 CALL API SAU
                     await deleteCar(id)
+
                     message.success("Deleted successfully 🗑")
-                    fetchCars()
-                } catch {
+
+                } catch (err) {
+                    console.log('err:', err)
                     message.error("Delete failed ❌")
+
+                    // 🔥 rollback nếu lỗi
+                    fetchCars()
                 }
             }
         })
@@ -257,103 +280,131 @@ const AdminDashboard = () => {
                         key: "cars",
                         label: "🚘 Cars",
                         children: (
-                            <div style={carWrapper}>
-                                {/* FORM */}
-                                <div style={carFormCard}>
-                                    <h2 style={carTitle}>
-                                        {editingCar ? "✏️ Edit Car" : "Add New Car"}
-                                    </h2>
+                            <div style={{ padding: 10 }}>
 
-                                    <div style={carForm}>
-                                        <input
-                                            placeholder="Car name"
-                                            value={form.name}
-                                            onChange={e => setForm({ ...form, name: e.target.value })}
-                                            style={carInput}
-                                        />
+                                {/* HEADER */}
+                                <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between" }}>
+                                    <h2>Car Management</h2>
 
-                                        <input
-                                            placeholder="Brand"
-                                            value={form.brand}
-                                            onChange={e => setForm({ ...form, brand: e.target.value })}
-                                            style={carInput}
-                                        />
-
-                                        <input
-                                            placeholder="Location"
-                                            value={form.location}
-                                            onChange={e => setForm({ ...form, location: e.target.value })}
-                                            style={carInput}
-                                        />
-
-                                        <input
-                                            placeholder="Price / day"
-                                            value={form.price}
-                                            onChange={e => setForm({ ...form, price: e.target.value })}
-                                            style={carInput}
-                                        />
-
-                                        <input
-                                            placeholder="Seats"
-                                            value={form.seats}
-                                            onChange={e => setForm({ ...form, seats: e.target.value })}
-                                            style={carInput}
-                                        />
-
-                                        <label style={uploadBox}>
-                                            📷 Upload Image
-                                            <input
-                                                type="file"
-                                                hidden
-                                                onChange={e => setImage(e.target.files[0])}
-                                            />
-                                        </label>
-
-                                        {image && (
-                                            <div style={previewBox}>
-                                                <img
-                                                    src={URL.createObjectURL(image)}
-                                                    style={previewImg}
-                                                />
-                                            </div>
-                                        )}
-
-                                        <button style={carSubmit} onClick={handleSubmitCar} disabled={loading}>
-                                            {loading ? "Processing..." : editingCar ? "Update Car" : "+ Add Car"}
-                                        </button>
-                                    </div>
+                                    <Button
+                                        type="primary"
+                                        onClick={() => {
+                                            setEditingCar(null)
+                                            antdForm.resetFields()
+                                            setOpenModal(true)
+                                        }}
+                                    >
+                                        + Add Car
+                                    </Button>
                                 </div>
 
-                                {/* LIST */}
-                                <div style={carListCard}>
-                                    <h2 style={carTitle}>Car List</h2>
+                                {/* GRID LIST */}
+                                <div style={carGrid}>
+                                    {cars.map(car => (
+                                        <div key={car._id} style={carItem}>
 
-                                    <div style={carGrid}>
-                                        {cars.map(car => (
-                                            <div key={car._id} style={carItem}>
-                                                <img
-                                                    src={buildImageUrl(car.image)}
-                                                    style={carImage}
-                                                />
+                                            <img
+                                                src={buildImageUrl(car.image)}
+                                                style={carImage}
+                                            />
 
-                                                <h4>{car.name}</h4>
-                                                <p>{car.brand}</p>
-                                                <p>{car.location}</p>
-                                                <p style={price}> {Number(car.price).toLocaleString()}/day</p>
+                                            <div style={{ padding: 10 }}>
+
+                                                <h4 style={carName}>
+                                                    {car.name}
+                                                </h4>
+
+                                                <p style={carText}>{car.brand}</p>
+                                                <p style={carText}>{car.location}</p>
+
+                                                <p style={price}>
+                                                    {Number(car.price).toLocaleString()}₫/day
+                                                </p>
 
                                                 <div style={actionRow}>
-                                                    <button style={editBtn} onClick={() => setEditingCar(car)}>
-                                                        Edit
-                                                    </button>
+                                                    <Button
+                                                        size="small"
+                                                        onClick={() => {
+                                                            setEditingCar(car)
+                                                            setOpenModal(true)
 
-                                                    <button style={deleteBtn} onClick={() => handleDeleteCar(car._id)}>
+                                                            antdForm.setFieldsValue({
+                                                                ...car,
+                                                                image: []
+                                                            })
+                                                        }}
+                                                    >
+                                                        Edit
+                                                    </Button>
+
+                                                    <Button
+                                                        size="small"
+                                                        danger
+                                                        onClick={() => handleDeleteCar(car._id)}
+                                                    >
                                                         Delete
-                                                    </button>
+                                                    </Button>
                                                 </div>
+
                                             </div>
-                                        ))}
-                                    </div>
+                                        </div>
+                                    ))}
                                 </div>
+
+                                {/* MODAL */}
+                                <Modal
+                                    title={editingCar ? "Edit Car" : "Add Car"}
+                                    open={openModal}
+                                    onCancel={() => setOpenModal(false)}
+                                    footer={null}
+                                    destroyOnHidden
+                                >
+                                    <Form
+                                        form={antdForm}
+                                        layout="vertical"
+                                        onFinish={(values) => {
+                                            handleSubmitCar(values)
+                                            setOpenModal(false)
+                                        }}
+                                    >
+
+                                        <Form.Item name="name" rules={[{ required: true }]}>
+                                            <Input placeholder="Car name" />
+                                        </Form.Item>
+
+                                        <Form.Item name="brand" rules={[{ required: true }]}>
+                                            <Input placeholder="Brand" />
+                                        </Form.Item>
+
+                                        <Form.Item name="location" rules={[{ required: true }]}>
+                                            <Input placeholder="Location" />
+                                        </Form.Item>
+
+                                        <Form.Item name="price" rules={[{ required: true }]}>
+                                            <InputNumber style={{ width: "100%" }} placeholder="Price" />
+                                        </Form.Item>
+
+                                        <Form.Item name="seats" rules={[{ required: true }]}>
+                                            <InputNumber style={{ width: "100%" }} placeholder="Seats" />
+                                        </Form.Item>
+
+                                        <Form.Item
+                                            name="image"
+                                            valuePropName="fileList"
+                                            getValueFromEvent={(e) => e?.fileList}
+                                        >
+                                            <Upload beforeUpload={() => false} maxCount={1}>
+                                                <Button>Upload Image</Button>
+                                            </Upload>
+                                        </Form.Item>
+
+                                        <Button type="primary" htmlType="submit" block>
+                                            {editingCar ? "Update Car" : "Create Car"}
+                                        </Button>
+
+                                    </Form>
+                                </Modal>
+
                             </div>
                         )
                     }
@@ -408,117 +459,48 @@ const badge = {
 
 /* ===== CAR ===== */
 
-const carWrapper = {
-    display: "grid",
-    gridTemplateColumns: "350px 1fr",
-    gap: 20
-}
-
-const carFormCard = {
-    background: "#fff",
-    padding: 20,
-    borderRadius: 16,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.08)"
-}
-
-const carListCard = {
-    background: "#fff",
-    padding: 20,
-    borderRadius: 16,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.08)"
-}
-
-const carTitle = {
-    marginBottom: 15
-}
-
-const carForm = {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12
-}
-
-const carInput = {
-    padding: "10px",
-    borderRadius: 10,
-    border: "1px solid #ddd"
-}
-
-const uploadBox = {
-    padding: "10px",
-    background: "#406093",
-    color: "#fff",
-    textAlign: "center",
-    borderRadius: 10,
-    cursor: "pointer"
-}
-
-const previewBox = {
-    marginTop: 10
-}
-
-const previewImg = {
-    width: "100%",
-    borderRadius: 10
-}
-
-const carSubmit = {
-    padding: "12px",
-    background: "#22c55e",
-    color: "#fff",
-    border: "none",
-    borderRadius: 10,
-    fontWeight: "bold",
-    cursor: "pointer"
-}
-
 const carGrid = {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-    gap: 20
+    gridTemplateColumns: "repeat(5, 1fr)", // 🔥 5 cột cố định
+    gap: 16
 }
 
 const carItem = {
-    background: "#f9fafb",
-    padding: 15,
+    background: "#fff",
     borderRadius: 12,
-    textAlign: "center"
+    overflow: "hidden",
+    height: 290,
+    display: "flex",
+    flexDirection: "column"
 }
 
 const carImage = {
     width: "100%",
     height: 120,
-    objectFit: "cover",
-    borderRadius: 10,
-    marginBottom: 10
+    objectFit: "cover"
+}
+
+const carName = {
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    marginBottom: 4
+}
+
+const carText = {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 2
 }
 
 const price = {
-    color: "#22c55e",
-    fontWeight: "bold"
+    color: "#406093",
+    fontWeight: "bold",
+    marginTop: 6
 }
 
 const actionRow = {
     display: "flex",
-    justifyContent: "center",
-    gap: 10,
+    justifyContent: "space-between",
     marginTop: 10
-}
-
-const editBtn = {
-    background: "#3b82f6",
-    color: "#fff",
-    border: "none",
-    padding: "6px 10px",
-    borderRadius: 8,
-    cursor: "pointer"
-}
-
-const deleteBtn = {
-    background: "#ef4444",
-    color: "#fff",
-    border: "none",
-    padding: "6px 10px",
-    borderRadius: 8,
-    cursor: "pointer"
 }

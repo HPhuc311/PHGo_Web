@@ -15,6 +15,7 @@ import AdminRoute from './components/routes/AdminRoute'
 import AdminDashboard from './pages/AdminDashboard'
 import UserRoute from './components/routes/UserRoute'
 import Cars from './pages/Car'
+import ScrollToTop from './components/common/ScrollToTop'
 
 const { Content } = Layout
 
@@ -28,6 +29,7 @@ function App() {
             <div className='container'>
                 <Navbar />
                 <Content style={{ padding: '20px' }}>
+                    <ScrollToTop /> 
                     <Routes>
                         <Route path="/" element={<Home />} />
                         <Route path="/cars" element={<CarList />} />

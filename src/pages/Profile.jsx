@@ -120,7 +120,7 @@ const Profile = () => {
                 method: 'POST',
                 body: JSON.stringify({
                     ...values,
-                    brand: detectCardType(values.number), // 🔥 THÊM              //
+                    brand: detectCardType(values.number),
                 })
             })
 
@@ -256,7 +256,10 @@ const Profile = () => {
             <Modal
                 title="Add New Card"
                 open={showAddCard}
-                onCancel={() => setShowAddCard(false)}
+                destroyOnHidden
+                onCancel={() => 
+                    setShowAddCard(false)}
+                    
                 footer={null}
             >
                 <Form onFinish={handleAddCard} layout="vertical">
@@ -405,7 +408,6 @@ const Profile = () => {
                     <Button
                         style={{marginLeft: 40}}
                         onClick={() => {
-                            cardForm.resetFields()
                             setShowAddCard(true)
                         }}
                     >
