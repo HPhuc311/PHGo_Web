@@ -403,6 +403,7 @@ const Profile = () => {
             {activeTab === 'payment' && (
                 <Card title="Payment Methods" extra={
                     <Button
+                        style={{marginLeft: 40}}
                         onClick={() => {
                             cardForm.resetFields()
                             setShowAddCard(true)
