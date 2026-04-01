@@ -11,7 +11,7 @@ const CarCard = ({ car }) => {
             onClick={() => navigate(`/cars/${car._id}`)}
             style={{
                 borderRadius: '16px',
-                height: '100%', // 🔥 QUAN TRỌNG
+                height: '100%',
                 display: 'flex',
                 flexDirection: 'column'
             }}
@@ -49,7 +49,7 @@ const CarCard = ({ car }) => {
 
                 {/* LOCATION */}
                 <p style={{ marginBottom: 6, color: '#666' }}>
-                    📍 {car.location}
+                    {car.location}
                 </p>
 
                 {/* PRICE */}
