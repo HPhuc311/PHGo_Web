@@ -2,8 +2,15 @@ import { useEffect, useState } from "react"
 import AdminUserTable from "../components/admin/AdminUserTable"
 import { getAllTrips, updateTripStatus } from "../services/tripServices"
 import { createCar, getCars, deleteCar, updateCar } from "../../src/services/carService"
-import { Form, Input, InputNumber, Upload, Button, Card, Row, Col, message, Modal, Tabs, Spin, Select } from "antd"
+import { Form, Input, InputNumber, Upload, Button, Card, Row, Col, message, Modal, Tabs, Spin, Select, Tag } from "antd"
 import { buildImageUrl } from "../utils/image"
+import {
+    UserOutlined,
+    CarOutlined,
+    ProfileOutlined,
+    PlusOutlined,
+    DashboardOutlined
+} from '@ant-design/icons'
 
 const AdminDashboard = () => {
     const [trips, setTrips] = useState([])
@@ -146,11 +153,11 @@ const AdminDashboard = () => {
         })
     }
 
-    if (loading) return <Spin style={{ marginTop: 100 }} />
+    if (loading) return <Spin style={{ textAlign: "center", marginTop: 100 }} />
 
     return (
         <div style={{ padding: 20, fontFamily: "Arial" }}>
-            <h1>Admin Dashboard</h1>
+            <h1> <DashboardOutlined /> Admin Dashboard</h1>
 
             {/* STATS */}
             <div style={{ display: "flex", gap: 20, marginBottom: 20 }}>
@@ -182,30 +189,37 @@ const AdminDashboard = () => {
                 items={[
                     {
                         key: "users",
-                        label: "👤 Users",
+                        label: (
+                            <span>
+                                <UserOutlined style={{ color: '#1677ff' }} /> Users
+                            </span>
+                        ),
                         children: <AdminUserTable />
                     },
 
                     {
                         key: "trips",
-                        label: "🚗 Trips",
+                        label: (
+                            <span>
+                                <ProfileOutlined style={{ color: '#722ed1' }} /> Trips
+                            </span>
+                        ),
                         children: (
                             <div style={tripContainer}>
                                 <table style={table}>
                                     <thead>
                                         <tr style={theadRow}>
-                                            <th>User</th>
-                                            <th>Pickup</th>
-                                            <th>Destination</th>
-                                            <th>Status</th>
-                                            <th>Action</th>
+                                            <th style={{ width: "20%"}}>User</th>
+                                            <th style={{ width: "20%"}}>Pickup</th>
+                                            <th style={{ width: "20%"}}>Destination</th>
+                                            <th style={{ width: "20%" , textAlign: "center"}}>Status</th>
+                                            <th style={{ width: "20%", textAlign: "center" }}>Action</th>
                                         </tr>
                                     </thead>
 
                                     <tbody>
-                                        {trips.map((trip) => {
-
-                                            const nextOptions = statusFlow[trip.status] || []
+                                        {trips.map(trip => {
+                                            const next = statusFlow[trip.status] || []
 
                                             return (
                                                 <tr key={trip._id} style={row}>
@@ -213,33 +227,40 @@ const AdminDashboard = () => {
                                                     <td style={cell}>{trip.pickup}</td>
                                                     <td style={cell}>{trip.destination}</td>
 
-                                                    <td style={cell}>
-                                                        <span style={{
-                                                            ...badge,
-                                                            background: getStatusColor(trip.status)
+                                                    <td style={{ ...cell, textAlign: "center" }}>
+                                                        <div style={{
+                                                            display: "flex",
+                                                            justifyContent: "center"
                                                         }}>
-                                                            {trip.status}
-                                                        </span>
+                                                            <Tag color={getStatusColor(trip.status)}>
+                                                                {trip.status}
+                                                            </Tag>
+                                                        </div>
                                                     </td>
 
-                                                    <td style={cell}>
-                                                        {nextOptions.length === 0 ? (
-                                                            <span style={{ color: "#999" }}>Done</span>
-                                                        ) : (
-                                                            <Select
-                                                                style={{ width: 140 }}
-                                                                placeholder="Update"
-                                                                onChange={(value) =>
-                                                                    handleChangeStatus(trip._id, value)
-                                                                }
-                                                            >
-                                                                {nextOptions.map(s => (
-                                                                    <Select.Option key={s} value={s}>
-                                                                        {s}
-                                                                    </Select.Option>
-                                                                ))}
-                                                            </Select>
-                                                        )}
+                                                    <td style={{ ...cell, textAlign: "center" }}>
+                                                        <div style={{
+                                                            display: "flex",
+                                                            justifyContent: "center",
+                                                            alignItems: "center",
+                                                            minHeight: 32 // 🔥 QUAN TRỌNG
+                                                        }}>
+                                                            {next.length === 0 ? (
+                                                                <span style={{ color: "#999" }}>Done</span>
+                                                            ) : (
+                                                                <Select
+                                                                    style={{ width: 140 }}
+                                                                    placeholder="Update"
+                                                                    onChange={(v) => handleChangeStatus(trip._id, v)}
+                                                                >
+                                                                    {next.map(s => (
+                                                                        <Select.Option key={s} value={s}>
+                                                                            {s}
+                                                                        </Select.Option>
+                                                                    ))}
+                                                                </Select>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             )
@@ -252,7 +273,11 @@ const AdminDashboard = () => {
 
                     {
                         key: "cars",
-                        label: "🚘 Cars",
+                        label: (
+                            <span>
+                                <CarOutlined style={{ color: '#406093' }} /> Cars
+                            </span>
+                        ),
                         children: (
                             <div style={{ padding: 10 }}>
 
@@ -262,13 +287,14 @@ const AdminDashboard = () => {
 
                                     <Button
                                         type="primary"
+                                        icon={<PlusOutlined />}
                                         onClick={() => {
                                             setEditingCar(null)
                                             antdForm.resetFields()
                                             setOpenModal(true)
                                         }}
                                     >
-                                        + Add Car
+                                        Add Car
                                     </Button>
                                 </div>
 
@@ -404,32 +430,36 @@ const tripContainer = {
 
 const table = {
     width: "100%",
-    borderCollapse: "collapse"
+    borderCollapse: "collapse",
+    tableLayout: "fixed"
 }
 
 const theadRow = {
-    textAlign: "left",
     color: "#666",
     fontSize: 13,
     borderBottom: "2px solid #eee"
 }
 
 const row = {
-    borderBottom: "1px solid #eee"
+    // textAlign: "center",
+    borderBottom: "1px solid #eee",
+    height: 60
 }
 
 const cell = {
-    padding: "14px 16px",
-    verticalAlign: "middle"
+    verticalAlign: "middle",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis"
 }
 
-const badge = {
-    padding: "6px 14px",
-    borderRadius: 20,
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: 500
-}
+// const badge = {
+//     padding: "6px 14px",
+//     borderRadius: 20,
+//     color: "#fff",
+//     fontSize: 12,
+//     fontWeight: 500
+// }
 
 /* ===== CAR ===== */
 

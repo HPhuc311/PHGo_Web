@@ -3,6 +3,11 @@ import { Tabs, Empty, Spin, Button } from 'antd'
 import { getMyTrips } from '../services/tripServices'
 import TripCard from '../components/trip/TripCard'
 import { useNavigate } from 'react-router-dom'
+import {
+    CarOutlined,
+    HistoryOutlined,
+    CloseCircleOutlined
+} from '@ant-design/icons'
 
 const MyTrips = () => {
     const [trips, setTrips] = useState([])
@@ -90,17 +95,29 @@ const MyTrips = () => {
     const items = [
         {
             key: 'upcoming',
-            label: '🚗 Upcoming',
+            label: (
+                <span>
+                    <CarOutlined/> Upcoming
+                </span>
+            ),
             children: renderList(getTripsByGroup('upcoming'))
         },
         {
             key: 'history',
-            label: '📜 History',
+            label: (
+                <span>
+                    <HistoryOutlined /> History
+                </span>
+            ),
             children: renderList(getTripsByGroup('history'))
         },
         {
             key: 'cancelled',
-            label: '❌ Cancelled',
+            label: (
+                <span>
+                    <CloseCircleOutlined /> Cancelled
+                </span>
+            ),
             children: renderList(getTripsByGroup('cancelled'))
         }
     ]
