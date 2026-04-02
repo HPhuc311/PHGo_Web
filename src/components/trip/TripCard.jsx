@@ -2,9 +2,11 @@ import { Card, Button, Tag, Modal } from 'antd'
 import { cancelTrip } from '../../services/tripServices'
 import dayjs from 'dayjs'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const TripCard = ({ trip, onCancelSuccess }) => {
     const [loading, setLoading] = useState(false)
+    const navigate = useNavigate()
 
     const handleCancel = () => {
         Modal.confirm({
@@ -102,7 +104,7 @@ const TripCard = ({ trip, onCancelSuccess }) => {
             <div style={{ display: 'flex', gap: 10 }}>
 
                 {trip.status === 'pending' && (
-                    <Button type="primary">
+                    <Button type="primary" onClick={() => navigate('/booking', { state: { trip } })}>
                         Pay Now
                     </Button>
                 )}

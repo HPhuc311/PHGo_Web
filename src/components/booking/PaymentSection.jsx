@@ -59,7 +59,6 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
         if (!selectedCard) {
             return message.error("Please select a card")
         }
-
         setLoading(true)
         await onConfirm(totalPrice, selectedCard)
         setLoading(false)
