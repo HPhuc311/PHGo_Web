@@ -50,8 +50,8 @@ const Booking = () => {
             }
 
             setBookingError(null)
-            await createTrip(newTrip)
-
+            const res = await createTrip(newTrip)
+            setBookingError(res._id) 
             setPrice(totalPrice)
             setStep(4)
 
@@ -188,7 +188,9 @@ const Booking = () => {
                         <Button
                             size="large"
                             block
-                            onClick={() => setStep(1)}
+                            onClick={() => {
+                                setStep(1)
+                                setBookingError(null)}}
                         >
                             ← Back
                         </Button>
@@ -210,7 +212,7 @@ const Booking = () => {
             {/* STEP 3: PAYMENT */}
             {step === 3 && bookingData && (
                 <PaymentSection
-                    bookingError={bookingError}
+                    bookingError={!!bookingError}
                     bookingData={bookingData}
                     onConfirm={handleConfirm}
                     onBack={() => setStep(2)} // 👉 quay lại confirm
