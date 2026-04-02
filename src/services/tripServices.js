@@ -7,8 +7,9 @@ export const createTrip = (data) => {
     })
 }
 
-export const getMyTrips = () =>
-    API('/api/trips/my')
+export const getMyTrips = () => {
+    return fetchWithAuth('/api/trips/my')
+}
 
 export const cancelTrip = (id) =>
     API(`/api/trips/${id}/cancel`, {
@@ -19,11 +20,12 @@ export const cancelTrip = (id) =>
 export const getAllTrips = () =>
     API('/api/trips/admin')
 
-export const updateTripStatus = (id, status) =>
-    API(`/api/trips/${id}/status`, {
+export const updateTripStatus = (id, status) => {
+    return fetchWithAuth(`/api/trips/${id}/status`, {
         method: 'PUT',
         body: JSON.stringify({ status })
     })
+}
 
 export const deleteTrip = (id) => {
     return fetchWithAuth(`/api/trips/${id}`, {

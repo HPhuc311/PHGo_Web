@@ -3,13 +3,14 @@ import {Card, message, Button, Typography, Divider, Space} from 'antd'
 import BookingForm from '../components/booking/BookingForm'
 import PaymentSection from '../components/booking/PaymentSection'
 import Receipt from '../components/booking/Receipt'
-import { createTrip } from '../services/tripServices'
+import { createTrip, updateTripStatus } from '../services/tripServices'
 import { useLocation } from 'react-router-dom'
 import {
     CarOutlined,
     EnvironmentOutlined,
     UserOutlined,
-    ClockCircleOutlined
+    ClockCircleOutlined,
+    ScheduleOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 
@@ -53,6 +54,8 @@ const Booking = () => {
             const res = await createTrip(newTrip)
             setBookingError(res._id) 
             setPrice(totalPrice)
+
+            await updateTripStatus(res._id, 'paid')
             setStep(4)
 
         } catch (err) {
@@ -146,12 +149,31 @@ const Booking = () => {
                         {/* TIME */}
                         <div style={rowStyle}>
                             <Text type="secondary">
-                                <ClockCircleOutlined /> Time
+                                <ScheduleOutlined /> Time
                             </Text>
                             <Text strong>
                                 {dayjs(bookingData.time?.[0]).format('DD/MM HH:mm')} -{" "}
                                 {dayjs(bookingData.time?.[1]).format('DD/MM HH:mm')}
                             </Text>
+                        </div>
+
+                        <div style={rowStyle}>
+                            <Text type="secondary">
+                                <ClockCircleOutlined /> Total Days
+                            </Text>
+                            <p style={{ margin: 0, fontWeight: 500 }}>
+                                {(() => {
+                                    const start = dayjs(bookingData?.time?.[0])
+                                    const end = dayjs(bookingData?.time?.[1])
+
+                                    const totalDays = Math.max(
+                                        1,
+                                        end.startOf('day').diff(start.startOf('day'), 'day') + 1
+                                    )
+
+                                    return `${totalDays} day${totalDays > 1 ? 's' : ''}`
+                                })()}
+                            </p>
                         </div>
 
                     </Space>
@@ -170,17 +192,20 @@ const Booking = () => {
                     >
                         <Text type="secondary">Total Price</Text>
                         <Title level={3} style={{ margin: 0, color: '#1677ff' }}>
-                            {(
-                                Number(selectedCar?.price || 0) *
-                                Math.max(
-                                    1,
-                                    dayjs(bookingData.time?.[1]).diff(
-                                        dayjs(bookingData.time?.[0]),
-                                        'day'
-                                    ) + 1
-                                )
-                            ).toLocaleString()} VND
-                        </Title>
+                        {(() => {
+                            const start = dayjs(bookingData?.time?.[0])
+                            const end = dayjs(bookingData?.time?.[1])
+
+                            const totalDays = Math.max(
+                                1,
+                                end.startOf('day').diff(start.startOf('day'), 'day') + 1
+                            )
+
+                            const totalPrice = Number(selectedCar?.price || 0) * totalDays
+
+                            return `${totalPrice.toLocaleString()} VND`
+                        })()}
+                    </Title>
                     </div>
 
                     {/* ACTION BUTTONS */}

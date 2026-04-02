@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import AdminUserTable from "../components/admin/AdminUserTable"
-import { deleteTrip, getAllTrips, updateTripStatus } from "../services/tripServices"
+import { getAllTrips, updateTripStatus } from "../services/tripServices"
 import { createCar, getCars, deleteCar, updateCar } from "../../src/services/carService"
 import { Form, Input, InputNumber, Upload, Button, Card, Row, Col, message, Modal, Tabs, Spin, Select } from "antd"
 import { buildImageUrl } from "../utils/image"
@@ -15,15 +15,16 @@ const AdminDashboard = () => {
 
     const [openModal, setOpenModal] = useState(false)
 
-    // const [form, setForm] = useState({
-    //     name: '',
-    //     brand: '',
-    //     location: '',
-    //     price: '',
-    //     seats: '',
-    // })
-
-    // const [image, setImage] = useState(null)
+    // 🔥 STATUS FLOW FIXED (NO CANCEL AFTER START)
+    const statusFlow = {
+        pending: ['paid', 'cancelled'],
+        paid: ['confirmed', 'cancelled'],
+        confirmed: ['on_the_way', 'cancelled'],
+        on_the_way: ['in_progress'],
+        in_progress: ['completed'],
+        completed: [],
+        cancelled: []
+    }
 
     // ================= TRIPS =================
     const fetchTrips = async () => {
@@ -33,34 +34,29 @@ const AdminDashboard = () => {
 
     const handleChangeStatus = async (id, status) => {
 
-        // 🔥 nếu chọn cancel → confirm xoá
-        if (status === "cancelled") {
-            return Modal.confirm({
-                title: "Delete Trip?",
-                content: "This will permanently delete the trip ❗",
-                okText: "Yes, Delete",
-                okType: "danger",
-                cancelText: "Cancel",
+        const currentTrip = trips.find(t => t._id === id)
 
-                onOk: async () => {
-                    try {
-                        await deleteTrip(id)
-                        message.success("Trip deleted successfully 🗑")
-                        fetchTrips()
-                    } catch (err) {
-                        console.log('err:', err)
-                        message.error("Delete failed ❌")
-                    }
-                }
-            })
+        // 🔥 CHẶN cancel sai (đang chạy)
+        if (
+            status === "cancelled" &&
+            ['on_the_way', 'in_progress'].includes(currentTrip?.status)
+        ) {
+            return message.error("Cannot cancel ongoing trip 🚫")
         }
 
-        // 🔥 các status khác giữ nguyên
         try {
-            await updateTripStatus(id, status)
-            fetchTrips()
+            const updatedTrip = await updateTripStatus(id, status)
+
+            message.success("Status updated ✅")
+
+            setTrips(prev =>
+                prev.map(t =>
+                    t._id === id ? updatedTrip : t
+                )
+            )
+
         } catch (err) {
-            console.log('err:', err)
+            console.log(err)
             message.error("Update failed ❌")
         }
     }
@@ -68,8 +64,11 @@ const AdminDashboard = () => {
     const getStatusColor = (status) => {
         switch (status) {
             case "pending": return "#facc15"
+            case "paid": return "#3b82f6"
             case "confirmed": return "#22c55e"
-            case "completed": return "#3b82f6"
+            case "on_the_way": return "#a855f7"
+            case "in_progress": return "#0ea5e9"
+            case "completed": return "#16a34a"
             case "cancelled": return "#ef4444"
             default: return "#ccc"
         }
@@ -86,18 +85,10 @@ const AdminDashboard = () => {
         }
     }
 
-
-
     useEffect(() => {
         fetchTrips()
         fetchCars()
     }, [])
-
-    // useEffect(() => {
-    //     if (editingCar) {
-    //         setForm(editingCar)
-    //     }
-    // }, [editingCar])
 
     const handleSubmitCar = async (values) => {
         const formData = new FormData()
@@ -113,12 +104,9 @@ const AdminDashboard = () => {
         }
 
         try {
-            let updatedCar
-
             if (editingCar) {
-                updatedCar = await updateCar(editingCar._id, formData)
+                const updatedCar = await updateCar(editingCar._id, formData)
 
-                // 🔥 update UI ngay
                 setCars(prev =>
                     prev.map(c =>
                         c._id === editingCar._id ? updatedCar : c
@@ -133,7 +121,6 @@ const AdminDashboard = () => {
                 message.success("Car created 🚀")
             }
 
-            // 🔥 reset form
             antdForm.resetFields()
             setEditingCar(null)
 
@@ -145,41 +132,21 @@ const AdminDashboard = () => {
     const handleDeleteCar = (id) => {
         Modal.confirm({
             title: "Delete Car",
-            content: "Are you sure you want to delete this car?",
-            okText: "Yes",
-            cancelText: "Cancel",
             okType: "danger",
 
             onOk: async () => {
                 try {
-                    // 🔥 XOÁ NGAY TRÊN UI
                     setCars(prev => prev.filter(car => car._id !== id))
-
-                    // 🔥 CALL API SAU
                     await deleteCar(id)
-
-                    message.success("Deleted successfully 🗑")
-
-                } catch (err) {
-                    console.log('err:', err)
-                    message.error("Delete failed ❌")
-
-                    // 🔥 rollback nếu lỗi
+                    message.success("Deleted 🗑")
+                } catch {
                     fetchCars()
                 }
             }
         })
     }
 
-    if (loading) {
-        return (
-            <div style={{ textAlign: 'center', marginTop: 100 }}>
-                <Spin size="large" />
-            </div>
-        )
-    }
-
-
+    if (loading) return <Spin style={{ marginTop: 100 }} />
 
     return (
         <div style={{ padding: 20, fontFamily: "Arial" }}>
@@ -230,46 +197,53 @@ const AdminDashboard = () => {
                                             <th>User</th>
                                             <th>Pickup</th>
                                             <th>Destination</th>
-                                            <th>Passengers</th>
-                                            <th style={{ textAlign: "center" }}>Status</th>
-                                            <th style={{ textAlign: "center" }}>Action</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
 
                                     <tbody>
-                                        {trips.map((trip) => (
-                                            <tr key={trip._id} style={row}>
-                                                <td style={cell}>{trip.user?.name}</td>
-                                                <td style={cell}>{trip.pickup}</td>
-                                                <td style={cell}>{trip.destination}</td>
-                                                <td style={cell}>{trip.passengers}</td>
+                                        {trips.map((trip) => {
 
-                                                <td style={{ ...cell, textAlign: "center" }}>
-                                                    <span style={{
-                                                        ...badge,
-                                                        background: getStatusColor(trip.status)
-                                                    }}>
-                                                        {trip.status}
-                                                    </span>
-                                                </td>
+                                            const nextOptions = statusFlow[trip.status] || []
 
-                                                <td style={{ ...cell, textAlign: "center" }}>
-                                                    <Select
-                                                        value={trip.status}
-                                                        style={{ width: 130 }}
-                                                        onChange={(value) =>
-                                                            handleChangeStatus(trip._id, value)
-                                                        }
-                                                        options={[
-                                                            { value: "pending", label: "Pending" },
-                                                            { value: "confirmed", label: "Confirmed" },
-                                                            { value: "completed", label: "Completed" },
-                                                            { value: "cancelled", label: "Cancelled" },
-                                                        ]}
-                                                    />
-                                                </td>
-                                            </tr>
-                                        ))}
+                                            return (
+                                                <tr key={trip._id} style={row}>
+                                                    <td style={cell}>{trip.user?.name}</td>
+                                                    <td style={cell}>{trip.pickup}</td>
+                                                    <td style={cell}>{trip.destination}</td>
+
+                                                    <td style={cell}>
+                                                        <span style={{
+                                                            ...badge,
+                                                            background: getStatusColor(trip.status)
+                                                        }}>
+                                                            {trip.status}
+                                                        </span>
+                                                    </td>
+
+                                                    <td style={cell}>
+                                                        {nextOptions.length === 0 ? (
+                                                            <span style={{ color: "#999" }}>Done</span>
+                                                        ) : (
+                                                            <Select
+                                                                style={{ width: 140 }}
+                                                                placeholder="Update"
+                                                                onChange={(value) =>
+                                                                    handleChangeStatus(trip._id, value)
+                                                                }
+                                                            >
+                                                                {nextOptions.map(s => (
+                                                                    <Select.Option key={s} value={s}>
+                                                                        {s}
+                                                                    </Select.Option>
+                                                                ))}
+                                                            </Select>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

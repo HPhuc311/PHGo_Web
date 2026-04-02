@@ -18,7 +18,10 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
 
     const totalDays = Math.max(
         1,
-        Math.ceil(dayjs(end).diff(dayjs(start), 'hour') / 24)
+        dayjs(end).startOf('day').diff(
+            dayjs(start).startOf('day'),
+            'day'
+        ) + 1
     )
 
     const totalPrice = pricePerDay * totalDays
