@@ -5,16 +5,27 @@ const NotificationContext = createContext()
 
 export const NotificationProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([])
-    const { user } = useAuth() || {} // 🔥 chống crash
+    const { user } = useAuth() || {}
 
     useEffect(() => {
-        // ❌ chưa login → không chạy
-        if (!user) return
+        if (!user) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setNotifications([]) // logout → clear UI
+            return
+        }
 
-        // ❌ đã hiện rồi → không chạy lại
-        const shown = localStorage.getItem("discount_shown")
+        const userId = user._id
+
+        // 🔥 1. LOAD notification cũ
+        const savedNoti = localStorage.getItem(`notifications_${ userId } `)
+        if (savedNoti) {
+            setNotifications(JSON.parse(savedNoti))
+        }
+
+        const shown = localStorage.getItem(`discount_shown_${ userId } `)
         if (shown) return
 
+        const delay = import.meta.env.DEV ? 5000 : 5 * 60 * 1000
 
         const timer = setTimeout(() => {
             const couponCode = "DISCOUNT10"
@@ -26,12 +37,16 @@ export const NotificationProvider = ({ children }) => {
                 code: couponCode
             }
 
-            setNotifications(prev => [newNoti, ...prev])
+            const updated = [newNoti]
 
-            localStorage.setItem("discount_shown", "true")
-            localStorage.setItem("coupon_code", couponCode)
+            setNotifications(updated)
 
-        }, 5 * 1000)
+            // 🔥 2. SAVE notification
+            localStorage.setItem(`notifications_${ userId } `, JSON.stringify(updated))
+            localStorage.setItem(`discount_shown_${ userId } `, "true")
+            localStorage.setItem(`coupon_${ userId } `, couponCode)
+
+        }, delay)
 
         return () => clearTimeout(timer)
 
