@@ -1,26 +1,27 @@
 import { useEffect, useState } from "react"
 import AdminUserTable from "../components/admin/AdminUserTable"
-import { getAllTrips, updateTripStatus } from "../services/tripServices"
+import { deleteTrip, getAllTrips, updateTripStatus } from "../services/tripServices"
 import { createCar, getCars, deleteCar, updateCar } from "../../src/services/carService"
-import { Form, Input, InputNumber, Upload, Button, Card, Row, Col, message, Modal, Tabs, Spin, Select, Tag } from "antd"
+import { Form, Input, InputNumber, Upload, Button, message, Modal, Tabs, Spin} from "antd"
 import { buildImageUrl } from "../utils/image"
 import {
     UserOutlined,
     CarOutlined,
     ProfileOutlined,
     PlusOutlined,
-    DashboardOutlined
+    DashboardOutlined,
 } from '@ant-design/icons'
+import AdminTripTable from "../components/admin/AdminTripTable"
 
 const AdminDashboard = () => {
     const [trips, setTrips] = useState([])
     const [cars, setCars] = useState([])
     const [editingCar, setEditingCar] = useState(null)
     const [loading, setLoading] = useState(false)
-    
     const [antdForm] = Form.useForm()
 
     const [openModal, setOpenModal] = useState(false)
+
 
     // 🔥 STATUS FLOW FIXED (NO CANCEL AFTER START)
     const statusFlow = {
@@ -153,7 +154,49 @@ const AdminDashboard = () => {
         })
     }
 
-    if (loading) return <Spin style={{ textAlign: "center", marginTop: 100 }} />
+    const handleDeleteTrip = (trip) => {
+
+        // ❌ chặn trước
+        if (!['completed', 'cancelled'].includes(trip.status)) {
+            return message.error("Only completed or cancelled trips can be deleted 🚫")
+        }
+
+        Modal.confirm({
+            title: "Delete this trip?",
+            content: "This action cannot be undone ⚠️",
+            okText: "Delete",
+            okType: "danger",
+            cancelText: "Cancel",
+
+            onOk: async () => {
+                try {
+                    await deleteTrip(trip._id)
+
+                    // 🔥 update UI ngay (optimistic)
+                    setTrips(prev =>
+                        prev.filter(t => t._id !== trip._id)
+                    )
+
+                    message.success("Trip deleted successfully ✅")
+
+                } catch (err) {
+                    console.error(err)
+                    message.error("Delete failed ❌")
+                }
+            }
+        })
+    }
+
+    
+
+
+    if (loading) {
+        return (
+            <div style={{ textAlign: 'center', marginTop: 100 }}>
+                <Spin size="large" />
+            </div>
+        )
+    }
 
     return (
         <div style={{ padding: 20, fontFamily: "Arial" }}>
@@ -205,72 +248,15 @@ const AdminDashboard = () => {
                             </span>
                         ),
                         children: (
-                            <div style={tripContainer}>
-                                <table style={table}>
-                                    <thead>
-                                        <tr style={theadRow}>
-                                            <th style={{ width: "20%"}}>User</th>
-                                            <th style={{ width: "20%"}}>Pickup</th>
-                                            <th style={{ width: "20%"}}>Destination</th>
-                                            <th style={{ width: "20%" , textAlign: "center"}}>Status</th>
-                                            <th style={{ width: "20%", textAlign: "center" }}>Action</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        {trips.map(trip => {
-                                            const next = statusFlow[trip.status] || []
-
-                                            return (
-                                                <tr key={trip._id} style={row}>
-                                                    <td style={cell}>{trip.user?.name}</td>
-                                                    <td style={cell}>{trip.pickup}</td>
-                                                    <td style={cell}>{trip.destination}</td>
-
-                                                    <td style={{ ...cell, textAlign: "center" }}>
-                                                        <div style={{
-                                                            display: "flex",
-                                                            justifyContent: "center"
-                                                        }}>
-                                                            <Tag color={getStatusColor(trip.status)}>
-                                                                {trip.status}
-                                                            </Tag>
-                                                        </div>
-                                                    </td>
-
-                                                    <td style={{ ...cell, textAlign: "center" }}>
-                                                        <div style={{
-                                                            display: "flex",
-                                                            justifyContent: "center",
-                                                            alignItems: "center",
-                                                            minHeight: 32 // 🔥 QUAN TRỌNG
-                                                        }}>
-                                                            {next.length === 0 ? (
-                                                                <span style={{ color: "#999" }}>Done</span>
-                                                            ) : (
-                                                                <Select
-                                                                    style={{ width: 140 }}
-                                                                    placeholder="Update"
-                                                                    onChange={(v) => handleChangeStatus(trip._id, v)}
-                                                                >
-                                                                    {next.map(s => (
-                                                                        <Select.Option key={s} value={s}>
-                                                                            {s}
-                                                                        </Select.Option>
-                                                                    ))}
-                                                                </Select>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
+                            <AdminTripTable
+                                trips={trips}
+                                statusFlow={statusFlow}
+                                handleChangeStatus={handleChangeStatus}
+                                handleDeleteTrip={handleDeleteTrip}
+                                getStatusColor={getStatusColor}
+                            />
                         )
                     },
-
                     {
                         key: "cars",
                         label: (
@@ -421,44 +407,36 @@ export default AdminDashboard
 const cardStyle = { background: "#fff", padding: 20, borderRadius: 10 }
 const numberStyle = { fontSize: 24, fontWeight: "bold" }
 
-const tripContainer = {
-    background: "#fff",
-    padding: 20,
-    borderRadius: 16,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.08)"
-}
+// const tripContainer = {
+//     background: "#fff",
+//     padding: 20,
+//     borderRadius: 16,
+//     boxShadow: "0 10px 30px rgba(0,0,0,0.08)"
+// }
 
-const table = {
-    width: "100%",
-    borderCollapse: "collapse",
-    tableLayout: "fixed"
-}
+// const table = {
+//     width: "100%",
+//     borderCollapse: "collapse",
+//     tableLayout: "fixed"
+// }
 
-const theadRow = {
-    color: "#666",
-    fontSize: 13,
-    borderBottom: "2px solid #eee"
-}
+// const theadRow = {
+//     color: "#666",
+//     fontSize: 13,
+//     borderBottom: "2px solid #eee"
+// }
 
-const row = {
-    // textAlign: "center",
-    borderBottom: "1px solid #eee",
-    height: 60
-}
+// const row = {
+//     // textAlign: "center",
+//     borderBottom: "1px solid #eee",
+//     height: 60
+// }
 
-const cell = {
-    verticalAlign: "middle",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis"
-}
-
-// const badge = {
-//     padding: "6px 14px",
-//     borderRadius: 20,
-//     color: "#fff",
-//     fontSize: 12,
-//     fontWeight: 500
+// const cell = {
+//     verticalAlign: "middle",
+//     whiteSpace: "nowrap",
+//     overflow: "hidden",
+//     textOverflow: "ellipsis"
 // }
 
 /* ===== CAR ===== */

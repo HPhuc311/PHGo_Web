@@ -1,13 +1,15 @@
-import { Avatar, Dropdown } from 'antd'
+import { Avatar, Badge, Dropdown } from 'antd'
 import { BellOutlined, DownOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { buildImageUrl } from '../../utils/image'
+import { useNotification } from '../../context/NotificationContext'
+
 
 const Navbar = () => {
     const navigate = useNavigate()
     const { user, logout } = useAuth()
-
+    const { notifications } = useNotification()
     const dropdownItems = [
         {
             key: 'profile',
@@ -23,6 +25,16 @@ const Navbar = () => {
             },
         },
     ]
+
+    const items = notifications.map(n => ({
+        key: n.id,
+        label: (
+            <div>
+                <b>{n.title}</b>
+                <div style={{ fontSize: 12 }}>{n.message}</div>
+            </div>
+        )
+    }))
     return (
         <div
             style={{
@@ -67,7 +79,11 @@ const Navbar = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
 
                 {/* Notification */}
-                <BellOutlined style={{ fontSize: '18px', cursor: 'pointer' }} />
+                <Dropdown menu={{ items }} placement="bottomRight">
+                    <Badge count={notifications.length}>
+                        <BellOutlined style={{ fontSize: 20, cursor: "pointer" }} />
+                    </Badge>
+                </Dropdown>
 
                 {/* AUTH */}
                 {!user ? (

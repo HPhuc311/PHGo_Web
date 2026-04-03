@@ -5,11 +5,14 @@ import App from './App'
 import 'antd/dist/reset.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { AuthProvider } from './context/AuthContext'
+import { NotificationProvider } from './context/NotificationContext'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <AuthProvider>
-      <App />
+      <NotificationProvider>
+        <App />
+      </NotificationProvider>
     </AuthProvider>
   </BrowserRouter>
 )
