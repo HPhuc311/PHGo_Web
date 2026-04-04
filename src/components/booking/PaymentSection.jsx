@@ -16,6 +16,9 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
     const pricePerDay = Number(bookingData?.car?.price || 0)
     const [start, end] = bookingData?.time || []
 
+    const [coupon, setCoupon] = useState("")
+    const [discount, setDiscount] = useState(0)
+
     const totalDays = Math.max(
         1,
         dayjs(end).startOf('day').diff(
@@ -60,14 +63,44 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
             return message.error("Please select a card")
         }
         setLoading(true)
-        await onConfirm(totalPrice, selectedCard)
+        await onConfirm(finalPrice, selectedCard,coupon)
         setLoading(false)
     }
+
+    const handleApplyCoupon = async () => {
+        try {
+            const res = await fetchWithAuth('/api/coupon/apply', {
+                method: 'POST',
+                body: JSON.stringify({ code: coupon })
+            })
+
+            setDiscount(res.discount)
+            message.success(`Discount ${res.discount}% applied 🎉`)
+        } catch (err) {
+            message.error(err.message)
+        }
+    }
+
+    const finalPrice = totalPrice * (1 - discount / 100)
 
     return (
         <Card title="Payment">
 
-            <h3>Total: {totalPrice.toLocaleString()} VND</h3>
+            <h3>Total: {finalPrice.toLocaleString()} VND</h3>
+
+            <Input
+                placeholder="Enter coupon code"
+                value={coupon}
+                onChange={(e) => setCoupon(e.target.value)}
+                style={{ marginTop: 10 }}
+            />
+
+            <Button
+                onClick={handleApplyCoupon}
+                style={{ marginTop: 10 }}
+            >
+                Apply Coupon
+            </Button>
 
             {/* SELECT CARD */}
             <Select

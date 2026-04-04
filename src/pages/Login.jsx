@@ -24,6 +24,7 @@ const Login = () => {
             if (res?.token) {
                 localStorage.setItem('user', JSON.stringify(res.user))
                 localStorage.setItem('token', res.token)
+                localStorage.setItem("new_coupon", res.coupon)
 
                 login({
                     ...res.user,

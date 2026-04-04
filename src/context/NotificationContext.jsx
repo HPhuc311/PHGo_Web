@@ -10,41 +10,52 @@ export const NotificationProvider = ({ children }) => {
     useEffect(() => {
         if (!user) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
-            setNotifications([]) // logout → clear UI
+            setNotifications([])
             return
         }
 
         const userId = user._id
 
-        // 🔥 1. LOAD notification cũ
-        const savedNoti = localStorage.getItem(`notifications_${ userId } `)
+        const notiKey = `notifications_${userId}`
+        const shownKey = `discount_shown_${userId}`
+        const couponKey = `coupon_${userId}`
+
+        const savedNoti = localStorage.getItem(notiKey)
         if (savedNoti) {
             setNotifications(JSON.parse(savedNoti))
         }
 
-        const shown = localStorage.getItem(`discount_shown_${ userId } `)
+        // 🔥 2. LẤY COUPON TỪ LOGIN (backend gửi về)
+        const couponCode = localStorage.getItem("new_coupon")
+
+        if (!couponCode) return
+
+        // 👉 tránh hiển thị nhiều lần
+        const shown = localStorage.getItem(shownKey)
         if (shown) return
 
         const delay = 5000
 
         const timer = setTimeout(() => {
-            const couponCode = "DISCOUNT10"
 
             const newNoti = {
                 id: Date.now(),
-                title: "🎉 Special Discount!",
-                message: `Use code ${ couponCode } to get 10 % off!`,
+                title: "🎉 Discount 15%",
+                message: `Use code ${couponCode} to get 15% off`,
                 code: couponCode
             }
 
-            const updated = [newNoti]
+            const updated = [newNoti, ...(savedNoti ? JSON.parse(savedNoti) : [])]
 
             setNotifications(updated)
 
-            // 🔥 2. SAVE notification
-            localStorage.setItem(`notifications_${ userId } `, JSON.stringify(updated))
-            localStorage.setItem(`discount_shown_${ userId } `, "true")
-            localStorage.setItem(`coupon_${ userId } `, couponCode)
+            // 🔥 SAVE
+            localStorage.setItem(notiKey, JSON.stringify(updated))
+            localStorage.setItem(shownKey, "true")
+            localStorage.setItem(couponKey, couponCode)
+
+            // 👉 clear để không spam
+            localStorage.removeItem("new_coupon")
 
         }, delay)
 

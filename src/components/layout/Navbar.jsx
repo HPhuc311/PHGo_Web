@@ -1,4 +1,4 @@
-import { Avatar, Badge, Dropdown } from 'antd'
+import { Avatar, Badge, Button, Dropdown, message } from 'antd'
 import { BellOutlined, DownOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
@@ -26,12 +26,42 @@ const Navbar = () => {
         },
     ]
 
+    const handleCopy = (code) => {
+        navigator.clipboard.writeText(code)
+        message.success("Copied to clipboard 🎉")
+    }
+
     const items = notifications.map(n => ({
         key: n.id,
         label: (
-            <div>
+            <div style={{ minWidth: 220 }}>
                 <b>{n.title}</b>
-                <div style={{ fontSize: 12 }}>{n.message}</div>
+
+                <div style={{ fontSize: 12, margin: "5px 0" }}>
+                    {n.message}
+                </div>
+
+                {/* 👉 HIỂN THỊ CODE */}
+                {n.code && (
+                    <div style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginTop: 5,
+                        background: "#f0f5ff",
+                        padding: "5px 8px",
+                        borderRadius: 6
+                    }}>
+                        <b style={{ color: "#406093" }}>{n.code}</b>
+
+                        <Button
+                            size="small"
+                            onClick={() => handleCopy(n.code)}
+                        >
+                            Copy
+                        </Button>
+                    </div>
+                )}
             </div>
         )
     }))
