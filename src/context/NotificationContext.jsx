@@ -25,7 +25,7 @@ export const NotificationProvider = ({ children }) => {
         const shown = localStorage.getItem(`discount_shown_${ userId } `)
         if (shown) return
 
-        const delay = import.meta.env.DEV ? 5000 : 5 * 60 * 1000
+        const delay = 5000
 
         const timer = setTimeout(() => {
             const couponCode = "DISCOUNT10"
