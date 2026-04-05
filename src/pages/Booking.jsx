@@ -3,7 +3,7 @@ import { Card, message, Button, Typography, Divider, Space } from 'antd'
 import BookingForm from '../components/booking/BookingForm'
 import PaymentSection from '../components/booking/PaymentSection'
 import Receipt from '../components/booking/Receipt'
-import { createTrip, updateTripStatus } from '../services/tripServices'
+import { createTrip, payTrip,} from '../services/tripServices'
 import { useLocation } from 'react-router-dom'
 import {
     CarOutlined,
@@ -84,15 +84,14 @@ const Booking = () => {
     }
 
     // ================= PAYMENT =================
-    const handlePayment = async (totalPrice) => {
+    const handlePayment = async (card, coupon) => {
         try {
-            await updateTripStatus(tripId, 'paid')
+            const res = await payTrip(tripId, { card, couponCode: coupon })
 
-            setPrice(totalPrice)
+            setPrice(res.price) // lấy từ backend
             setStep(4)
 
             message.success('Payment successful 🎉')
-
         } catch (err) {
             message.error(err.message || 'Payment failed ❌')
         }

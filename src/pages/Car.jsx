@@ -138,7 +138,7 @@ const Cars = () => {
                         allowClear
                         size="middle"
                         style={{ width: 140 }}
-                        value={tempFilter.brand}
+                        value={tempFilter.brand || undefined}
                         onChange={(val) =>
                             setTempFilter(prev => ({ ...prev, brand: val }))
                         }
@@ -156,7 +156,7 @@ const Cars = () => {
                         allowClear
                         size="middle"
                         style={{ width: 120 }}
-                        value={tempFilter.seats}
+                        value={tempFilter.brand || undefined}
                         onChange={(val) =>
                             setTempFilter(prev => ({ ...prev, seats: val }))
                         }
@@ -172,7 +172,7 @@ const Cars = () => {
                         allowClear
                         size="middle"
                         style={{ width: 140 }}
-                        value={tempFilter.sort}
+                        value={tempFilter.brand || undefined}
                         onChange={(val) =>
                             setTempFilter(prev => ({ ...prev, sort: val }))
                         }

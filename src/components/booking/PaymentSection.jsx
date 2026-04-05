@@ -13,11 +13,13 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
     const [openAddCard, setOpenAddCard] = useState(false)
     const [cardForm] = Form.useForm()
 
+    const [coupon, setCoupon] = useState("")
+    const [checkingCoupon, setCheckingCoupon] = useState(false)
+
     const pricePerDay = Number(bookingData?.car?.price || 0)
     const [start, end] = bookingData?.time || []
 
-    const [coupon, setCoupon] = useState("")
-    const [discount, setDiscount] = useState(0)
+    const [previewPrice, setPreviewPrice] = useState(null)
 
     const totalDays = Math.max(
         1,
@@ -27,6 +29,7 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
         ) + 1
     )
 
+    // 👉 chỉ hiển thị base price (KHÔNG tính discount ở FE)
     const totalPrice = pricePerDay * totalDays
 
     // ================= ADD CARD =================
@@ -37,7 +40,6 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
                 body: JSON.stringify(values)
             })
 
-            // 🔥 update global user
             updateProfile({
                 ...user,
                 cards: res.cards
@@ -45,7 +47,6 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
 
             message.success("Card added 💳")
 
-            // 🔥 auto select card mới
             const newCard = res.cards[res.cards.length - 1]
             setSelectedCard(newCard.last4)
 
@@ -57,37 +58,77 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
         }
     }
 
+    // ================= APPLY COUPON (OPTIONAL CHECK) =================
+    const handleApplyCoupon = async () => {
+        if (!coupon) return message.error("Enter coupon code")
+
+        try {
+            setCheckingCoupon(true)
+
+            const res = await fetchWithAuth('/api/trips/preview-price', {
+                method: 'POST',
+                body: JSON.stringify({
+                    carId: bookingData.car._id,
+                    startTime: bookingData.time[0].toISOString(),
+                    endTime: bookingData.time[1].toISOString(),
+                    couponCode: coupon
+                })
+            })
+
+            setPreviewPrice(res)
+
+            message.success(`Discount ${res.discount}% applied 🎉`)
+
+        } catch (err) {
+            setPreviewPrice(null)
+            message.error(err.message || "Coupon invalid ❌")
+
+        } finally {
+            setCheckingCoupon(false)
+        }
+    }
+
     // ================= PAY =================
     const handlePay = async () => {
         if (!selectedCard) {
             return message.error("Please select a card")
         }
-        setLoading(true)
-        await onConfirm(finalPrice, selectedCard,coupon)
-        setLoading(false)
-    }
 
-    const handleApplyCoupon = async () => {
         try {
-            const res = await fetchWithAuth('/api/coupon/apply', {
-                method: 'POST',
-                body: JSON.stringify({ code: coupon })
-            })
+            setLoading(true)
 
-            setDiscount(res.discount)
-            message.success(`Discount ${res.discount}% applied 🎉`)
+            // 👉 chỉ gửi coupon + card lên backend
+            await onConfirm(selectedCard, coupon)
+
         } catch (err) {
-            message.error(err.message)
+            message.error(err.message || "Payment failed ❌")
+        } finally {
+            setLoading(false)
         }
     }
-
-    const finalPrice = totalPrice * (1 - discount / 100)
 
     return (
         <Card title="Payment">
 
-            <h3>Total: {finalPrice.toLocaleString()} VND</h3>
+            {/* 👉 HIỂN THỊ GIÁ GỐC */}
+            <h3>
+                Total:{" "}
+                {previewPrice
+                    ? (
+                        <>
+                            <span style={{ textDecoration: 'line-through', marginRight: 8 }}>
+                                {previewPrice.originalPrice.toLocaleString()}
+                            </span>
+                            <span style={{ color: 'green' }}>
+                                {previewPrice.finalPrice.toLocaleString()} VND
+                            </span>
+                        </>
+                    )
+                    : `${totalPrice.toLocaleString()} VND`
+                }
+            </h3>
 
+            {/* COUPON */}
             <Input
                 placeholder="Enter coupon code"
                 value={coupon}
@@ -97,6 +138,7 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
 
             <Button
                 onClick={handleApplyCoupon}
+                loading={checkingCoupon}
                 style={{ marginTop: 10 }}
             >
                 Apply Coupon
@@ -105,13 +147,12 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
             {/* SELECT CARD */}
             <Select
                 placeholder="Select your card"
-                style={{ width: '100%' }}
+                style={{ width: '100%', marginTop: 20 }}
                 value={selectedCard}
                 onChange={setSelectedCard}
                 dropdownRender={(menu) => (
                     <>
                         {menu}
-
                         <div style={{ padding: 8 }}>
                             <Button
                                 type="dashed"
@@ -200,6 +241,7 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
             </Modal>
         </Card>
     )
+
 }
 
 export default PaymentSection

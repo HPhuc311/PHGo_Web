@@ -61,7 +61,10 @@ const Receipt = ({ bookingData, price }) => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <Text strong style={{ fontSize: '18px' }}>Total Amount</Text>
                             <Title level={3} style={{ margin: 0, color: '#1677ff' }}>
-                                {price?.toLocaleString()} VND
+                                {new Intl.NumberFormat('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND'
+                                }).format(price)}
                             </Title>
                         </div>
                     </div>

@@ -33,3 +33,10 @@ export const deleteTrip = (id) => {
         body: JSON.stringify({ status })
     })
 }
+
+export const payTrip = async (id, data) => {
+    return fetchWithAuth(`/api/trips/${id}/pay`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    })
+}

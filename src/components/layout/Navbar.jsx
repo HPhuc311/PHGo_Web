@@ -1,6 +1,6 @@
 import { Avatar, Badge, Button, Dropdown, message } from 'antd'
 import { BellOutlined, DownOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { buildImageUrl } from '../../utils/image'
 import { useNotification } from '../../context/NotificationContext'
@@ -10,6 +10,7 @@ const Navbar = () => {
     const navigate = useNavigate()
     const { user, logout } = useAuth()
     const { notifications } = useNotification()
+    const location = useLocation()
     const dropdownItems = [
         {
             key: 'profile',
@@ -65,6 +66,10 @@ const Navbar = () => {
             </div>
         )
     }))
+
+    const isActive = (path) => location.pathname === path
+
+
     return (
         <div
             style={{
@@ -87,20 +92,52 @@ const Navbar = () => {
 
             {/* CENTER - MENU */}
             <div style={{ display: 'flex', gap: '30px', fontWeight: 500 }}>
-                <span style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
+                <span
+                    onClick={() => navigate('/')}
+                    style={{
+                        cursor: 'pointer',
+                        color: isActive('/') ? '#1677ff' : '#333',
+                        borderBottom: isActive('/') ? '2px solid #1677ff' : 'none',
+                        paddingBottom: 4,
+                        transition: 'all 0.2s'
+                    }}
+                >
                     Home
                 </span>
-                <span style={{ cursor: 'pointer' }} onClick={() => navigate('/cars-list')}>
+                <span
+                    onClick={() => navigate('/cars-list')}
+                    style={{
+                        cursor: 'pointer',
+                        color: isActive('/cars-list') ? '#1677ff' : '#333',
+                        borderBottom: isActive('/cars-list') ? '2px solid #1677ff' : 'none',
+                        paddingBottom: 4
+                    }}
+                >
                     Cars
                 </span>
-                <span style={{ cursor: 'pointer' }} onClick={() => navigate('/trips')}>
+                <span
+                    onClick={() => navigate('/trips')}
+                    style={{
+                        cursor: 'pointer',
+                        color: isActive('/trips') ? '#1677ff' : '#333',
+                        borderBottom: isActive('/trips') ? '2px solid #1677ff' : 'none',
+                        paddingBottom: 4
+                    }}
+                >
                     My Trips
                 </span>
                 {user?.role === 'admin' && (
 
-                    <span onClick={() => navigate('/admin')}
-                        style={{ cursor: 'pointer', fontWeight: 500 }}>
-                        Dashboard
+                    <span
+                        onClick={() => navigate('/admin')}
+                        style={{
+                            cursor: 'pointer',
+                            color: isActive('/admin') ? '#1677ff' : '#333',
+                            borderBottom: isActive('/admin') ? '2px solid #1677ff' : 'none',
+                            paddingBottom: 4
+                        }}
+                    >
+                        Cars
                     </span>
                 )}
             </div>
