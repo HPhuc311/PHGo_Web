@@ -9,7 +9,8 @@ import {
     Button,
     Card,
     Space,
-    Col
+    Col,
+    ConfigProvider
 } from 'antd'
 import { getCars } from '../services/carService'
 import CarCard from '../components/car/CarCard'
@@ -133,54 +134,104 @@ const Cars = () => {
                 >
 
                     {/* BRAND */}
-                    <Select
-                        placeholder="Brand"
-                        allowClear
-                        size="middle"
-                        style={{ width: 140 }}
-                        value={tempFilter.brand || undefined}
-                        onChange={(val) =>
-                            setTempFilter(prev => ({ ...prev, brand: val }))
-                        }
+                    <ConfigProvider
+                        theme={{
+                            token: {
+                                colorTextPlaceholder: '#000',   
+                                colorBorder: '#000',            
+                                colorPrimary: '#406093',          
+                            },
+                            components: {
+                                Select: {
+                                    colorTextPlaceholder: '#000',
+                                    activeBorderColor: '#000',
+                                    hoverBorderColor: '#000',
+                                }
+                            }
+                        }}
                     >
-                        {[...new Set(cars.map(c => c.brand))].map(b => (
-                            <Select.Option key={b} value={b}>
-                                {b}
-                            </Select.Option>
-                        ))}
-                    </Select>
+                        <Select
+                            placeholder="Brand"
+                            allowClear
+                            size="middle"
+                            style={{ width: 140 }}
+                            value={tempFilter.brand || undefined}
+                            onChange={(val) =>
+                                setTempFilter(prev => ({ ...prev, brand: val }))
+                            }
+                        >
+                            {[...new Set(cars.map(c => c.brand))].map(b => (
+                                <Select.Option key={b} value={b}>
+                                    {b}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </ConfigProvider>
 
                     {/* SEATS */}
-                    <Select
-                        placeholder="Seats"
-                        allowClear
-                        size="middle"
-                        style={{ width: 120 }}
-                        value={tempFilter.brand || undefined}
-                        onChange={(val) =>
-                            setTempFilter(prev => ({ ...prev, seats: val }))
-                        }
+                    <ConfigProvider
+                        theme={{
+                            token: {
+                                colorTextPlaceholder: '#000',   
+                                colorBorder: '#000',            
+                                colorPrimary: '#406093',          
+                            },
+                            components: {
+                                Select: {
+                                    colorTextPlaceholder: '#000',
+                                    activeBorderColor: '#000000',
+                                    hoverBorderColor: '#000',
+                                }
+                            }
+                        }}
                     >
-                        <Select.Option value="4">4 seats</Select.Option>
-                        <Select.Option value="5">5 seats</Select.Option>
-                        <Select.Option value="7">7 seats</Select.Option>
-                    </Select>
+                        <Select
+                            placeholder="Seats"
+                            allowClear
+                            size="middle"
+                            style={{ width: 120 }}
+                            value={tempFilter.seats || undefined}
+                            onChange={(val) =>
+                                setTempFilter(prev => ({ ...prev, seats: val }))
+                            }
+                        >
+                            <Select.Option value="4">4 seats</Select.Option>
+                            <Select.Option value="5">5 seats</Select.Option>
+                            <Select.Option value="7">7 seats</Select.Option>
+                        </Select>
+                    </ConfigProvider>
 
                     {/* SORT */}
-                    <Select
-                        placeholder="Sort"
-                        allowClear
-                        size="middle"
-                        style={{ width: 140 }}
-                        value={tempFilter.brand || undefined}
-                        onChange={(val) =>
-                            setTempFilter(prev => ({ ...prev, sort: val }))
-                        }
+                    <ConfigProvider
+                        theme={{
+                            token: {
+                                colorTextPlaceholder: '#000',   
+                                colorBorder: '#000',            
+                                colorPrimary: '#406093',          
+                            },
+                            components: {
+                                Select: {
+                                    colorTextPlaceholder: '#000',
+                                    activeBorderColor: '#000',
+                                    hoverBorderColor: '#000',
+                                }
+                            }
+                        }}
                     >
-                        <Select.Option value="low">Price ↑</Select.Option>
-                        <Select.Option value="high">Price ↓</Select.Option>
-                    </Select>
-
+                        <Select
+                            placeholder="Sort"
+                            allowClear
+                            size="middle"
+                            style={{ width: 140 }}
+                            value={tempFilter.sort || undefined}
+                            onChange={(val) =>
+                                setTempFilter(prev => ({ ...prev, sort: val }))
+                            }
+                        >
+                            <Select.Option value="low">Price ↑</Select.Option>
+                            <Select.Option value="high">Price ↓</Select.Option>
+                        </Select>
+                    </ConfigProvider>
                     {/* SLIDER GỌN */}
                     <div style={{ width: 220 }}>
                         <Slider
