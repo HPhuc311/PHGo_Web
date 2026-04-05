@@ -28,6 +28,7 @@ const Cars = () => {
         priceRange: [0, 0],
         brand: '',
         seats: '',
+        location: '',
         sort: ''
     })
 
@@ -50,6 +51,7 @@ const Cars = () => {
                     priceRange: [0, max],
                     brand: '',
                     seats: '',
+                    location: '',
                     sort: ''
                 })
             } catch (err) {
@@ -68,7 +70,7 @@ const Cars = () => {
 
         let result = [...cars]
 
-        const { priceRange, brand, seats, sort } = filter
+        const { priceRange, brand, location, seats, sort } = filter
 
         result = result.filter(car => {
             const price = Number(car.price)
@@ -78,6 +80,12 @@ const Cars = () => {
         if (brand) {
             result = result.filter(car =>
                 car.brand?.toLowerCase().includes(brand.toLowerCase())
+            )
+        }
+
+        if (location) {
+            result = result.filter(car =>
+                car.location?.toLowerCase().includes(location.toLowerCase())
             )
         }
 
@@ -103,6 +111,7 @@ const Cars = () => {
             priceRange: [0, maxPrice],
             brand: '',
             seats: '',
+            location: '',
             sort: ''
         }
 
@@ -198,6 +207,41 @@ const Cars = () => {
                             <Select.Option value="4">4 seats</Select.Option>
                             <Select.Option value="5">5 seats</Select.Option>
                             <Select.Option value="7">7 seats</Select.Option>
+                        </Select>
+                    </ConfigProvider>
+
+                    {/* location */}
+                    <ConfigProvider
+                        theme={{
+                            token: {
+                                colorTextPlaceholder: '#000',
+                                colorBorder: '#000',
+                                colorPrimary: '#406093',
+                            },
+                            components: {
+                                Select: {
+                                    colorTextPlaceholder: '#000',
+                                    activeBorderColor: '#000000',
+                                    hoverBorderColor: '#000',
+                                }
+                            }
+                        }}
+                    >
+                        <Select
+                            placeholder="Location"
+                            allowClear
+                            size="middle"
+                            style={{ width: 140 }}
+                            value={tempFilter.location || undefined}
+                            onChange={(val) =>
+                                setTempFilter(prev => ({ ...prev, location: val }))
+                            }
+                        >
+                            {[...new Set(cars.map(c => c.location))].map(b => (
+                                <Select.Option key={b} value={b}>
+                                    {b}
+                                </Select.Option>
+                            ))}
                         </Select>
                     </ConfigProvider>
 
