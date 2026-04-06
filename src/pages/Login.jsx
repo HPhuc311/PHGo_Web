@@ -30,7 +30,6 @@ const Login = () => {
                     ...res.user,
                     token: res.token
                 })
-
                 message.success('Login success 🎉')
                 navigate('/')
             } else {
@@ -38,6 +37,7 @@ const Login = () => {
             }
 
         } catch (err) {
+
             console.error(err)
             message.error('Server error')
         }
@@ -55,7 +55,6 @@ const Login = () => {
             if (data?.message?.toLowerCase().includes('error')) {
                 throw new Error(data.message)
             }
-
             message.success("OTP sent to your email 📩")
 
             setEmail(values.email)
@@ -83,7 +82,6 @@ const Login = () => {
             if (data?.message?.toLowerCase().includes('error')) {
                 throw new Error(data.message)
             }
-
             message.success("Password updated ✅")
             setShowReset(false)
 

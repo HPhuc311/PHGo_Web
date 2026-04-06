@@ -1,4 +1,4 @@
-import { Modal, Input, Button, message } from 'antd'
+import { Modal, Input, Button, message, Select } from 'antd'
 import { useState, useEffect } from 'react'
 import { updateUser } from '../../services/userService'
 
@@ -6,20 +6,24 @@ const UserModal = ({ user, onClose, onUpdated }) => {
     const [form, setForm] = useState({})
 
     useEffect(() => {
+        // ✅ clone để tránh mutate object gốc
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setForm(user || {})
+        setForm(user ? { ...user } : {})
     }, [user])
 
     const handleUpdate = async () => {
         try {
             const res = await updateUser(user._id, form)
 
+            message.destroy()
             message.success('Updated successfully')
 
             onUpdated(res.user)
             onClose()
+
         } catch (err) {
             console.log('err:', err)
+            message.destroy()
             message.error('Update failed')
         }
     }
@@ -31,6 +35,7 @@ const UserModal = ({ user, onClose, onUpdated }) => {
             footer={null}
             title="Edit User"
         >
+            {/* NAME */}
             <Input
                 placeholder="Name"
                 value={form?.name}
@@ -39,6 +44,7 @@ const UserModal = ({ user, onClose, onUpdated }) => {
                 }
             />
 
+            {/* PHONE */}
             <Input
                 placeholder="Phone"
                 value={form?.phone}
@@ -48,6 +54,7 @@ const UserModal = ({ user, onClose, onUpdated }) => {
                 style={{ marginTop: 10 }}
             />
 
+            {/* ADDRESS */}
             <Input
                 placeholder="Address"
                 value={form?.address}
@@ -57,6 +64,19 @@ const UserModal = ({ user, onClose, onUpdated }) => {
                 style={{ marginTop: 10 }}
             />
 
+            {/* 🔥 ROLE (NEW) */}
+            <Select
+                value={form?.role}
+                onChange={(value) =>
+                    setForm({ ...form, role: value })
+                }
+                style={{ width: '100%', marginTop: 10 }}
+            >
+                <Select.Option value="customer">Customer</Select.Option>
+                <Select.Option value="admin">Admin</Select.Option>
+            </Select>
+
+            {/* SAVE BUTTON */}
             <Button
                 type="primary"
                 block

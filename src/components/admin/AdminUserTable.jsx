@@ -36,11 +36,22 @@ const AdminUserTable = () => {
                 try {
                     await deleteUser(id)
 
-                    setUsers(prev => prev.filter(u => u._id !== id))
+                    // ✅ update users
+                    setUsers(prev => {
+                        const updated = prev.filter(u => u._id !== id)
+
+                        // ✅ sync luôn filteredUsers
+                        setFilteredUsers(updated)
+
+                        return updated
+                    })
+
+                    message.destroy()
                     message.success('Deleted successfully')
 
                 } catch (err) {
                     console.log('err:', err)
+                    message.destroy()
                     message.error('Delete failed')
                 }
             }
@@ -112,6 +123,12 @@ const AdminUserTable = () => {
                 onClose={() => setSelectedUser(null)}
                 onUpdated={(updatedUser) => {
                     setUsers(prev =>
+                        prev.map(u =>
+                            u._id === updatedUser._id ? updatedUser : u
+                        )
+                    )
+
+                    setFilteredUsers(prev =>
                         prev.map(u =>
                             u._id === updatedUser._id ? updatedUser : u
                         )

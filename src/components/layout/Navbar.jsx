@@ -126,6 +126,17 @@ const Navbar = () => {
                 >
                     My Trips
                 </span>
+                <span
+                    onClick={() => navigate('/support')}
+                    style={{
+                        cursor: 'pointer',
+                        color: isActive('/support') ? '#1677ff' : '#333',
+                        borderBottom: isActive('/support') ? '2px solid #1677ff' : 'none',
+                        paddingBottom: 4
+                    }}
+                >
+                    Support
+                </span>
                 {user?.role === 'admin' && (
 
                     <span
@@ -137,7 +148,7 @@ const Navbar = () => {
                             paddingBottom: 4
                         }}
                     >
-                        Cars
+                        DashBoard
                     </span>
                 )}
             </div>

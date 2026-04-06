@@ -12,6 +12,7 @@ import {
     DashboardOutlined,
 } from '@ant-design/icons'
 import AdminTripTable from "../components/admin/AdminTripTable"
+import AdminSupportTable from "../components/admin/AdminSupportTable"
 
 const AdminDashboard = () => {
     const [trips, setTrips] = useState([])
@@ -393,6 +394,11 @@ const AdminDashboard = () => {
 
                             </div>
                         )
+                    },
+                    {
+                        key: "support",
+                        label: "Support",
+                        children: <AdminSupportTable />
                     }
                 ]}
             />

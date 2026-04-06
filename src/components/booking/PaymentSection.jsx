@@ -44,7 +44,7 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
                 ...user,
                 cards: res.cards
             })
-
+            message.destroy()
             message.success("Card added 💳")
 
             const newCard = res.cards[res.cards.length - 1]
@@ -54,6 +54,7 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
             cardForm.resetFields()
 
         } catch (err) {
+            message.destroy()
             message.error(err.message || "Add card failed ❌")
         }
     }
@@ -76,11 +77,12 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
             })
 
             setPreviewPrice(res)
-
+            message.destroy()
             message.success(`Discount ${res.discount}% applied 🎉`)
 
         } catch (err) {
             setPreviewPrice(null)
+            message.destroy()
             message.error(err.message || "Coupon invalid ❌")
 
         } finally {
@@ -101,6 +103,7 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
             await onConfirm(selectedCard, coupon)
 
         } catch (err) {
+            message.destroy()
             message.error(err.message || "Payment failed ❌")
         } finally {
             setLoading(false)

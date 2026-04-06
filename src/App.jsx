@@ -16,6 +16,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import UserRoute from './components/routes/UserRoute'
 import Cars from './pages/Car'
 import ScrollToTop from './components/common/ScrollToTop'
+import SupportPage from './pages/SupportPage'
 
 const { Content } = Layout
 
@@ -38,7 +39,7 @@ function App() {
                         <Route path="/register" element={<Register />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/profile" element={<Profile />} />
-                        <Route path="/cars-list" element={<Cars />} />                        
+                        <Route path="/cars-list" element={<Cars />} />                       
                         <Route
                             path="/admin"
                             element={
@@ -61,6 +62,14 @@ function App() {
                             element={
                                 <UserRoute>
                                     <MyTrips />
+                                </UserRoute>
+                            }
+                        />
+                        <Route
+                            path="/support"
+                            element={
+                                <UserRoute>
+                                    <SupportPage />
                                 </UserRoute>
                             }
                         />
