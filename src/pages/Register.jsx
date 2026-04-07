@@ -8,18 +8,14 @@ const Register = () => {
 
     const handleRegister = async (values) => {
         try {
-            const res = await registerAPI(values)
+            await registerAPI(values)
 
-            if (res.message === 'Register success') {
-                message.success('Register successful 🎉')
+            message.success("Register successful! Check your email 📩")
 
-                // 👉 chuyển sang login
-                navigate('/login')
-            } else {
-                message.error(res.message)
-            }
-        } catch {
-            message.error('Server error')
+            navigate('/login')
+
+        } catch (err) {
+            message.error(err.message || "Register failed")
         }
     }
 

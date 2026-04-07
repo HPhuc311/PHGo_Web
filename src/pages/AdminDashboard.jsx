@@ -10,6 +10,7 @@ import {
     ProfileOutlined,
     PlusOutlined,
     DashboardOutlined,
+    QuestionCircleOutlined,
 } from '@ant-design/icons'
 import AdminTripTable from "../components/admin/AdminTripTable"
 import AdminSupportTable from "../components/admin/AdminSupportTable"
@@ -397,7 +398,9 @@ const AdminDashboard = () => {
                     },
                     {
                         key: "support",
-                        label: "Support",
+                        label: <span>
+                            <QuestionCircleOutlined style={{ color: '#406093' }} /> Support
+                        </span>,
                         children: <AdminSupportTable />
                     }
                 ]}
