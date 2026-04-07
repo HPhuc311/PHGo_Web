@@ -31,6 +31,7 @@ const TripCard = ({ trip, onCancelSuccess }) => {
     const [reviewed, setReviewed] = useState(false)
 
     // ================= CHECK REVIEW =================
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const checkReview = async () => {
         try {
             const res = await fetchWithAuth(`/api/trips/review/${trip._id}`)
@@ -44,7 +45,7 @@ const TripCard = ({ trip, onCancelSuccess }) => {
         if (trip.status === 'completed') {
             checkReview()
         }
-    }, [trip._id, trip.status])
+    }, [checkReview, trip._id, trip.status])
 
     // ================= CANCEL =================
     const handleCancel = () => {
