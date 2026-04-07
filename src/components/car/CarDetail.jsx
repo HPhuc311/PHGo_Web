@@ -17,21 +17,46 @@ import {
 
 import { getCars } from '../../services/carService'
 import { buildImageUrl } from '../../utils/image'
+import fetchWithAuth from '../../services/api'
 
 const CarDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
-    const [car, setCar] = useState(null)
 
-    useEffect(() => {
-        const fetchCar = async () => {
+    const [car, setCar] = useState(null)
+    const [reviews, setReviews] = useState([])
+
+    // ================= FETCH CAR =================
+    const fetchCar = async () => {
+        try {
             const data = await getCars()
             const found = data.find(c => c._id === id)
             setCar(found)
+        } catch (err) {
+            console.error(err)
         }
-        fetchCar()
+    }
+
+    // ================= FETCH REVIEWS =================
+    const fetchReviews = async () => {
+        try {
+            const res = await fetchWithAuth(`/api/cars/${id}/reviews`)
+            setReviews(res)
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
+    // ================= EFFECT =================
+    useEffect(() => {
+        if (id) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            fetchCar()
+            fetchReviews()
+        }
     }, [id])
 
+    // ================= LOADING =================
     if (!car) {
         return (
             <div style={{ textAlign: 'center', marginTop: 100 }}>
@@ -44,9 +69,11 @@ const CarDetail = () => {
         <div style={{ padding: '40px 80px' }}>
             <Row gutter={24}>
 
-                {/* LEFT - IMAGE */}
+                {/* ================= LEFT ================= */}
                 <Col md={16}>
                     <Card bordered={false}>
+
+                        {/* IMAGE */}
                         <img
                             src={buildImageUrl(car.image)}
                             alt={car.name}
@@ -58,8 +85,15 @@ const CarDetail = () => {
                             }}
                         />
 
+                        {/* NAME */}
                         <h1 style={{ marginTop: 20 }}>{car.name}</h1>
 
+                        {/* ⭐ RATING */}
+                        <div style={{ marginBottom: 10 }}>
+                            ⭐ {car.rating?.toFixed(1) || "0.0"} ({car.numReviews || 0} reviews)
+                        </div>
+
+                        {/* INFO */}
                         <div style={{ display: 'flex', gap: 20 }}>
                             <span>
                                 <EnvironmentOutlined /> {car.location}
@@ -91,10 +125,55 @@ const CarDetail = () => {
                             Comfortable and reliable car for your trip.
                             Perfect for city rides and long journeys.
                         </p>
+
+                        <Divider />
+
+                        {/* ================= REVIEWS ================= */}
+                        <h3>Customer Reviews</h3>
+
+                        {reviews.length === 0 ? (
+                            <p style={{ color: '#888' }}>No reviews yet</p>
+                        ) : (
+                            reviews.map((r) => (
+                                <div
+                                    key={r._id}
+                                    style={{
+                                        display: 'flex',
+                                        gap: 12,
+                                        padding: 12,
+                                        borderBottom: '1px solid #eee'
+                                    }}
+                                >
+                                    {/* AVATAR */}
+                                    <img
+                                        src={buildImageUrl(r.user?.avatar)}
+                                        alt="avatar"
+                                        style={{
+                                            width: 40,
+                                            height: 40,
+                                            borderRadius: '50%',
+                                            objectFit: 'cover'
+                                        }}
+                                    />
+
+                                    {/* CONTENT */}
+                                    <div>
+                                        <b>{r.user?.name}</b>
+
+                                        <div>⭐ {r.rating}</div>
+
+                                        <p style={{ color: '#666', margin: 0 }}>
+                                            {r.comment}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+
                     </Card>
                 </Col>
 
-                {/* RIGHT - BOOKING CARD */}
+                {/* ================= RIGHT ================= */}
                 <Col md={8}>
                     <Card
                         style={{

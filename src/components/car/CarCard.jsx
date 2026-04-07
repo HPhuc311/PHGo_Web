@@ -58,7 +58,9 @@ const CarCard = ({ car }) => {
                     justifyContent: 'space-between',
                     marginBottom: 6
                 }}>
-                    <span>⭐ {car.rating}</span>
+                    <span>
+                        ⭐ {car.rating?.toFixed(1) || "0.0"} ({car.numReviews || 0})
+                    </span>
                     <span style={{ color: '#406093', fontWeight: 'bold' }}>
                         {Number(car.price).toLocaleString()}đ/day
                     </span>

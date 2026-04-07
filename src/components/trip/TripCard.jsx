@@ -3,7 +3,8 @@ import {
     Button,
     Tag,
     Modal,
-    Space
+    Space,
+    message
 } from 'antd'
 import {
     EnvironmentOutlined,
@@ -17,12 +18,33 @@ import {
 
 import { cancelTrip } from '../../services/tripServices'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import ReviewForm from './ReviewForm'
+import fetchWithAuth from '../../services/api'
 
 const TripCard = ({ trip, onCancelSuccess }) => {
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
+
+    const [openReview, setOpenReview] = useState(false)
+    const [reviewed, setReviewed] = useState(false)
+
+    // ================= CHECK REVIEW =================
+    const checkReview = async () => {
+        try {
+            const res = await fetchWithAuth(`/api/trips/review/${trip._id}`)
+            setReviewed(res.reviewed)
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
+    useEffect(() => {
+        if (trip.status === 'completed') {
+            checkReview()
+        }
+    }, [trip._id, trip.status])
 
     // ================= CANCEL =================
     const handleCancel = () => {
@@ -33,10 +55,17 @@ const TripCard = ({ trip, onCancelSuccess }) => {
             cancelText: 'No',
             okType: 'danger',
             onOk: async () => {
-                setLoading(true)
-                await cancelTrip(trip._id)
-                onCancelSuccess(trip._id)
-                setLoading(false)
+                try {
+                    setLoading(true)
+                    await cancelTrip(trip._id)
+                    onCancelSuccess(trip._id)
+                    message.success("Trip cancelled")
+                } catch (err) {
+                    console.log('err:', err)
+                    message.error("Cancel failed")
+                } finally {
+                    setLoading(false)
+                }
             }
         })
     }
@@ -46,25 +75,18 @@ const TripCard = ({ trip, onCancelSuccess }) => {
         switch (trip.status) {
             case 'pending':
                 return { color: 'gold', text: 'Waiting Payment' }
-
             case 'paid':
                 return { color: 'blue', text: 'Paid' }
-
             case 'confirmed':
                 return { color: 'cyan', text: 'Driver Assigned' }
-
             case 'on_the_way':
                 return { color: 'purple', text: 'Driver Coming' }
-
             case 'in_progress':
                 return { color: 'processing', text: 'On Trip' }
-
             case 'completed':
                 return { color: 'green', text: 'Completed' }
-
             case 'cancelled':
                 return { color: 'red', text: 'Cancelled' }
-
             default:
                 return { color: 'default', text: 'Unknown' }
         }
@@ -73,120 +95,154 @@ const TripCard = ({ trip, onCancelSuccess }) => {
     const statusUI = getStatusUI()
 
     return (
-        <Card
-            hoverable
-            style={{
-                marginBottom: 16,
-                borderRadius: 16,
-                boxShadow: '0 6px 20px rgba(0,0,0,0.06)'
-            }}
-        >
-            {/* HEADER */}
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-            }}>
-                <Space>
-                    <CarOutlined style={{ fontSize: 18 }} />
-                    <h3 style={{ margin: 0 }}>{trip.carName}</h3>
-                </Space>
+        <>
+            {/* ================= REVIEW MODAL ================= */}
+            <Modal
+                open={openReview}
+                onCancel={() => setOpenReview(false)}
+                footer={null}
+                title="Rate your trip"
+            >
+                <ReviewForm
+                    tripId={trip._id}
+                    onSuccess={() => {
+                        setOpenReview(false)
+                        setReviewed(true)
+                        message.success("Thanks for your review")
+                    }}
+                />
+            </Modal>
 
-                <Tag color={statusUI.color}>
-                    {statusUI.text}
-                </Tag>
-            </div>
+            {/* ================= CARD ================= */}
+            <Card
+                hoverable
+                style={{
+                    marginBottom: 16,
+                    borderRadius: 16,
+                    boxShadow: '0 6px 20px rgba(0,0,0,0.06)'
+                }}
+            >
+                {/* HEADER */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                }}>
+                    <Space>
+                        <CarOutlined style={{ fontSize: 18 }} />
+                        <h3 style={{ margin: 0 }}>{trip.carName}</h3>
+                    </Space>
 
-            {/* ROUTE */}
-            <div style={{ marginTop: 10 }}>
-                <Space direction="vertical" size={2}>
+                    <Tag color={statusUI.color}>
+                        {statusUI.text}
+                    </Tag>
+                </div>
+
+                {/* ROUTE */}
+                <div style={{ marginTop: 10 }}>
+                    <Space direction="vertical" size={2}>
+                        <span>
+                            <EnvironmentOutlined style={{ color: "red" }} /> {trip.pickup}
+                        </span>
+
+                        {trip.destination && (
+                            <span>
+                                <EnvironmentOutlined style={{ color: "#406093" }} /> {trip.destination}
+                            </span>
+                        )}
+                    </Space>
+                </div>
+
+                {/* INFO */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginTop: 12,
+                    flexWrap: 'wrap'
+                }}>
                     <span>
-                        <EnvironmentOutlined style={{color: "red"}} /> {trip.pickup}
+                        <UserOutlined /> {trip.passengers} pax
                     </span>
 
-                    {trip.destination && (
-                        <span>
-                            <EnvironmentOutlined style={{ color: "#406093" }} /> {trip.destination}
-                        </span>
+                    <span>
+                        <ClockCircleOutlined />{' '}
+                        {dayjs(trip.startTime).format('DD/MM HH:mm')} -{' '}
+                        {dayjs(trip.endTime).format('DD/MM HH:mm')}
+                    </span>
+
+                    <span style={{ fontWeight: 600 }}>
+                        <DollarOutlined />{' '}
+                        {trip.price
+                            ? `${Number(trip.price).toLocaleString()} VND`
+                            : 'Not paid yet'}
+                    </span>
+                </div>
+
+                {/* ACTION */}
+                <div style={{
+                    marginTop: 16,
+                    display: 'flex',
+                    gap: 10,
+                    flexWrap: 'wrap'
+                }}>
+
+                    {/* PAY */}
+                    {trip.status === 'pending' && (
+                        <Button
+                            type="primary"
+                            icon={<DollarOutlined />}
+                            onClick={() =>
+                                navigate('/booking', { state: { trip } })
+                            }
+                        >
+                            Pay Now
+                        </Button>
                     )}
-                </Space>
-            </div>
 
-            {/* INFO */}
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginTop: 12,
-                flexWrap: 'wrap'
-            }}>
-                <span>
-                    <UserOutlined /> {trip.passengers} pax
-                </span>
+                    {/* DRIVER */}
+                    {trip.status === 'confirmed' && (
+                        <Button icon={<UserOutlined />}>
+                            View Driver
+                        </Button>
+                    )}
 
-                <span>
-                    <ClockCircleOutlined />{' '}
-                    {dayjs(trip.startTime).format('DD/MM HH:mm')} -{' '}
-                    {dayjs(trip.endTime).format('DD/MM HH:mm')}
-                </span>
+                    {/* TRACK */}
+                    {trip.status === 'on_the_way' && (
+                        <Button type="primary" icon={<EnvironmentOutlined />}>
+                            Track
+                        </Button>
+                    )}
 
-                <span style={{ fontWeight: 600 }}>
-                    <DollarOutlined />{' '}
-                    {trip.price
-                        ? `${Number(trip.price).toLocaleString()} VND`
-                        : 'Not paid yet'}
-                </span>
-            </div>
+                    {/* ⭐ REVIEW */}
+                    {trip.status === 'completed' && (
+                        reviewed ? (
+                            <Button disabled icon={<CheckCircleOutlined />}>
+                                Reviewed
+                            </Button>
+                        ) : (
+                            <Button
+                                icon={<CheckCircleOutlined />}
+                                onClick={() => setOpenReview(true)}
+                            >
+                                Review
+                            </Button>
+                        )
+                    )}
 
-            {/* ACTION */}
-            <div style={{
-                marginTop: 16,
-                display: 'flex',
-                gap: 10,
-                flexWrap: 'wrap'
-            }}>
-
-                {trip.status === 'pending' && (
-                    <Button
-                        type="primary"
-                        icon={<DollarOutlined />}
-                        onClick={() =>
-                            navigate('/booking', { state: { trip } })
-                        }
-                    >
-                        Pay Now
-                    </Button>
-                )}
-
-                {trip.status === 'confirmed' && (
-                    <Button icon={<UserOutlined />}>
-                        View Driver
-                    </Button>
-                )}
-
-                {trip.status === 'on_the_way' && (
-                    <Button type="primary" icon={<EnvironmentOutlined />}>
-                        Track
-                    </Button>
-                )}
-
-                {trip.status === 'completed' && (
-                    <Button icon={<CheckCircleOutlined />}>
-                        Review
-                    </Button>
-                )}
-
-                {['pending', 'paid', 'confirmed'].includes(trip.status) && (
-                    <Button
-                        danger
-                        loading={loading}
-                        icon={<CloseCircleOutlined />}
-                        onClick={handleCancel}
-                    >
-                        Cancel
-                    </Button>
-                )}
-            </div>
-        </Card>
+                    {/* CANCEL */}
+                    {['pending', 'paid', 'confirmed'].includes(trip.status) && (
+                        <Button
+                            danger
+                            loading={loading}
+                            icon={<CloseCircleOutlined />}
+                            onClick={handleCancel}
+                        >
+                            Cancel
+                        </Button>
+                    )}
+                </div>
+            </Card>
+        </>
     )
 }
 
