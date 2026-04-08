@@ -1,25 +1,75 @@
-import { Form, Input, DatePicker, InputNumber, Select, Radio, Button } from 'antd'
+import {
+    Form,
+    Input,
+    DatePicker,
+    Select,
+    Radio,
+    Button,
+    message
+} from 'antd'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import fetchWithAuth from '../../services/api'
+import isBetween from 'dayjs/plugin/isBetween'
+dayjs.extend(isBetween)
+
 
 const { RangePicker } = DatePicker
 
-const BookingForm = ({ onNext }) => {
+const BookingForm = ({ onNext, car }) => {
     const [form] = Form.useForm()
     const [serviceType, setServiceType] = useState('Local Ride')
+    const [bookedDates, setBookedDates] = useState([])
 
-    const handleSubmit = (values) => {
-        onNext(values)
+    // ================= FETCH BOOKED =================
+    const fetchBookedDates = async () => {
+        try {
+            const res = await fetchWithAuth(`/api/trips/booked/${car._id}`)
+            setBookedDates(res)
+        } catch (err) {
+            console.error(err)
+        }
     }
 
+    useEffect(() => {
+        if (car?._id) {
+            fetchBookedDates()
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [car])
+
+    // ================= DISABLE DATE =================
     const disabledDate = (current) => {
-        return current && current < dayjs().startOf('day')
+        if (!current) return false
+
+        // ❌ past
+        if (current < dayjs().startOf('day')) return true
+
+        // ❌ booked range
+        return bookedDates.some(trip => {
+            const start = dayjs(trip.startTime).startOf('day')
+            const end = dayjs(trip.endTime).endOf('day')
+
+            return current.isBetween(start, end, null, '[]')
+        })
+    }
+
+    // ================= SUBMIT =================
+    const handleSubmit = (values) => {
+        if (!values.time) {
+            return message.error("Please select time")
+        }
+
+        onNext({
+            ...values,
+            car
+        })
     }
 
     return (
         <Form layout="vertical" form={form} onFinish={handleSubmit}>
 
-            {/* ✅ SERVICE TYPE */}
+            {/* SERVICE TYPE */}
             <Form.Item
                 label="Service Type"
                 name="service"
@@ -33,7 +83,7 @@ const BookingForm = ({ onNext }) => {
                 </Select>
             </Form.Item>
 
-            {/* ✅ LOCAL RIDE */}
+            {/* LOCAL */}
             {serviceType === 'Local Ride' && (
                 <>
                     <Form.Item
@@ -54,7 +104,7 @@ const BookingForm = ({ onNext }) => {
                 </>
             )}
 
-            {/* ✅ AIRPORT */}
+            {/* AIRPORT */}
             {serviceType === 'Airport Transfer' && (
                 <>
                     <Form.Item
@@ -62,7 +112,7 @@ const BookingForm = ({ onNext }) => {
                         name="pickup"
                         rules={[{ required: true }]}
                     >
-                        <Input placeholder="Enter airport (e.g. Tan Son Nhat)" />
+                        <Input placeholder="Enter airport" />
                     </Form.Item>
 
                     <Form.Item
@@ -75,7 +125,7 @@ const BookingForm = ({ onNext }) => {
                 </>
             )}
 
-            {/* ✅ DAILY HIRE */}
+            {/* DAILY */}
             {serviceType === 'Daily Hire' && (
                 <Form.Item
                     label="Pickup Address"
@@ -90,20 +140,19 @@ const BookingForm = ({ onNext }) => {
             <Form.Item
                 label="Date & Time"
                 name="time"
-                rules={[{ required: true }]}
+                rules={[{ required: true, message: "Select date" }]}
             >
                 <RangePicker
                     style={{ width: '100%' }}
                     disabledDate={disabledDate}
                     showTime={{
                         format: 'HH:mm',
-                        minuteStep: 30, // ✅ bước 30 phút
-                        hideDisabledOptions: true // ✅ ẩn các phút không hợp lệ
+                        minuteStep: 30
                     }}
                     format="DD-MM-YYYY HH:mm"
                 />
             </Form.Item>
-            
+
             {/* NOTIFICATION */}
             <Form.Item label="Notification" name="notification">
                 <Radio.Group>
