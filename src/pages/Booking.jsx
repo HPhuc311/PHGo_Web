@@ -18,6 +18,7 @@ const Booking = () => {
     const [step, setStep] = useState(1)
     const [bookingData, setBookingData] = useState(null)
     const [price, setPrice] = useState(0)
+    const [discount, setDiscount] = useState(0)
     const [tripId, setTripId] = useState(null)
 
     const location = useLocation()
@@ -89,8 +90,9 @@ const Booking = () => {
             const res = await payTrip(tripId, { card, couponCode: coupon })
 
             setPrice(res.price) // lấy từ backend
+            setDiscount(res.discountAmount || 0)
             setStep(4)
-
+            console.log('PAYMENT RESPONSE:', res)
             message.success('Payment successful 🎉')
         } catch (err) {
             message.error(err.message || 'Payment failed ❌')
@@ -200,7 +202,7 @@ const Booking = () => {
 
             {/* STEP 4: RECEIPT */}
             {step === 4 && (
-                <Receipt bookingData={bookingData} price={price} />
+                <Receipt bookingData={bookingData} price={price} discount={discount}  />
             )}
         </div>
     )

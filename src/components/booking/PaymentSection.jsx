@@ -156,22 +156,34 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
         <Card title="Payment">
 
             {/* 👉 HIỂN THỊ GIÁ GỐC */}
-            <h3>
-                Total:{" "}
-                {previewPrice
-                    ? (
-                        <>
-                            <span style={{ textDecoration: 'line-through', marginRight: 8 }}>
-                                {previewPrice.originalPrice.toLocaleString()}
-                            </span>
-                            <span style={{ color: 'green' }}>
-                                {previewPrice.finalPrice.toLocaleString()} VND
-                            </span>
-                        </>
-                    )
-                    : `${totalPrice.toLocaleString()} VND`
-                }
-            </h3>
+            <div style={{ marginTop: 10 }}>
+
+                {/* SUBTOTAL */}
+                <div>
+                    Subtotal:{" "}
+                    {previewPrice
+                        ? previewPrice.originalPrice.toLocaleString()
+                        : totalPrice.toLocaleString()
+                    } VND
+                </div>
+
+                {/* DISCOUNT */}
+                {previewPrice?.discount > 0 && (
+                    <div style={{ color: 'green' }}>
+                        Discount: -{Math.round(previewPrice.originalPrice * previewPrice.discount / 100).toLocaleString()} VND
+                    </div>
+                )}
+
+                {/* TOTAL */}
+                <h3>
+                    Total:{" "}
+                    {previewPrice
+                        ? previewPrice.finalPrice.toLocaleString()
+                        : totalPrice.toLocaleString()
+                    } VND
+                </h3>
+
+            </div>
 
             {/* COUPON */}
             <Input
