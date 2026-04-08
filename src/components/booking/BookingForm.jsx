@@ -153,14 +153,6 @@ const BookingForm = ({ onNext, car }) => {
                 />
             </Form.Item>
 
-            {/* NOTIFICATION */}
-            <Form.Item label="Notification" name="notification">
-                <Radio.Group>
-                    <Radio value="email">Email</Radio>
-                    <Radio value="sms">SMS</Radio>
-                </Radio.Group>
-            </Form.Item>
-
             <Button type="primary" htmlType="submit" block>
                 Continue to Payment
             </Button>
