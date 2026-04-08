@@ -139,14 +139,6 @@ const Profile = () => {
         }
     }
 
-    // 🔥 FORMAT
-    const formatCardNumber = (value) => {
-        return value
-            .replace(/\D/g, '')
-            .replace(/(.{4})/g, '$1 ')
-            .trim()
-    }
-
     // 🔥 VALIDATE (LUHN)
     const validateCardNumber = (number) => {
         const cleaned = number.replace(/\s+/g, '')
@@ -262,7 +254,7 @@ const Profile = () => {
                     
                 footer={null}
             >
-                <Form onFinish={handleAddCard} layout="vertical">
+                <Form onFinish={handleAddCard} form={cardForm} layout="vertical">
 
                     <Form.Item
                         name="holder"
@@ -293,8 +285,8 @@ const Profile = () => {
                         <Input
                             placeholder="1234 5678 9012 3456"
                             maxLength={19}
+                            value={cardForm.getFieldValue('number')}
 
-                            // 🔥 LOGO TRONG INPUT
                             suffix={
                                 <span style={{ fontWeight: 600 }}>
                                     {cardType === 'visa' && 'VISA'}
@@ -303,9 +295,10 @@ const Profile = () => {
                             }
 
                             onChange={(e) => {
-                                const formatted = formatCardNumber(e.target.value)
-                                cardForm.setFieldsValue({ number: formatted })
+                                const raw = e.target.value.replace(/\D/g, '')
+                                const formatted = raw.replace(/(.{4})/g, '$1 ').trim()
 
+                                cardForm.setFieldsValue({ number: formatted })
                                 setCardType(detectCardType(formatted))
                             }}
                         />
@@ -409,6 +402,8 @@ const Profile = () => {
                         style={{marginLeft: 40}}
                         onClick={() => {
                             setShowAddCard(true)
+                            cardForm.resetFields()     
+                            setCardType('card') 
                         }}
                     >
                         + Add Card

@@ -21,6 +21,8 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
 
     const [previewPrice, setPreviewPrice] = useState(null)
 
+    const [cardType, setCardType] = useState('card')
+
     const totalDays = Math.max(
         1,
         dayjs(end).startOf('day').diff(
@@ -108,6 +110,46 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
         } finally {
             setLoading(false)
         }
+    }
+
+        const validateCardNumber = (number) => {
+        const cleaned = number.replace(/\s+/g, '')
+
+        if (!/^\d{13,19}$/.test(cleaned)) return false
+
+        let sum = 0
+        let shouldDouble = false
+
+        for (let i = cleaned.length - 1; i >= 0; i--) {
+            let digit = parseInt(cleaned[i])
+
+            if (shouldDouble) {
+                digit *= 2
+                if (digit > 9) digit -= 9
+            }
+
+            sum += digit
+            shouldDouble = !shouldDouble
+        }
+
+        return sum % 10 === 0
+    }
+
+
+    const formatCardNumber = (value) => {
+        return value
+            .replace(/\D/g, '')
+            .replace(/(.{4})/g, '$1 ')
+            .trim()
+    }
+
+    const detectCardType = (number) => {
+        const cleaned = number.replace(/\s/g, '')
+
+        if (cleaned.startsWith('4')) return 'visa'
+        if (/^5[1-5]/.test(cleaned)) return 'mastercard'
+
+        return 'card'
     }
 
     return (
@@ -208,7 +250,7 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
                     <Form.Item
                         name="holder"
                         label="Card Holder"
-                        rules={[{ required: true }]}
+                        rules={[{ required: true, message: 'Enter card holder name' }]}
                     >
                         <Input placeholder="Nguyen Van A" />
                     </Form.Item>
@@ -216,9 +258,40 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
                     <Form.Item
                         name="number"
                         label="Card Number"
-                        rules={[{ required: true }]}
+                        rules={[
+                            { required: true, message: 'Please enter card number' },
+                            {
+                                validator: (_, value) => {
+                                    if (!value) return Promise.resolve()
+
+                                    if (!validateCardNumber(value)) {
+                                        return Promise.reject('Invalid card number ❌')
+                                    }
+
+                                    return Promise.resolve()
+                                }
+                            }
+                        ]}
                     >
-                        <Input placeholder="1234 5678 9012 3456" />
+                        <Input
+                            placeholder="1234 5678 9012 3456"
+                            maxLength={19}
+
+                            // 🔥 LOGO TRONG INPUT
+                            suffix={
+                                <span style={{ fontWeight: 600 }}>
+                                    {cardType === 'visa' && 'VISA'}
+                                    {cardType === 'mastercard' && 'MC'}
+                                </span>
+                            }
+
+                            onChange={(e) => {
+                                const formatted = formatCardNumber(e.target.value)
+                                cardForm.setFieldsValue({ number: formatted })
+
+                                setCardType(detectCardType(formatted))
+                            }}
+                        />
                     </Form.Item>
 
                     <Form.Item
