@@ -17,7 +17,7 @@ const Footer = () => {
                         <p><b>Hotline:</b> 1900 1234</p>
                         <p>Support: 7AM - 10PM</p>
 
-                        <p><b>Email:</b> contact@mioto.vn</p>
+                        <p><b>Email:</b> contact@phgo.vn</p>
 
                         <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                             <FacebookOutlined />
@@ -58,7 +58,7 @@ const Footer = () => {
                 {/* Bottom info */}
                 <Row gutter={20}>
                     <Col md={12}>
-                        <p>© Mioto Asia Joint Stock Company</p>
+                        <p>© Phgo Asia Joint Stock Company</p>
                         <p>Business Registration No: 0317307544</p>
                     </Col>
 
