@@ -77,7 +77,7 @@ const Footer = () => {
 
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
                         <img
-                            src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Visa_Inc._logo_%282021%E2%80%93present%29.svg/500px-Visa_Inc._logo_%282021%E2%80%93present%29.svg.png"
                             alt="visa"
                             style={{ height: '30px' }}
                         />

@@ -13,7 +13,7 @@ const Receipt = ({ bookingData, price, discount = 0 }) => {
 
     if (!bookingData) return null
 
-    // 🔥 FIX: đảm bảo discount luôn là number
+    // FIX: đảm bảo discount luôn là number
     const discountValue = Number(discount || 0)
 
     const originalPrice = Number(price || 0) + Number(discountValue || 0)
@@ -89,7 +89,7 @@ const Receipt = ({ bookingData, price, discount = 0 }) => {
                         border: '1px solid #adc6ff'
                     }}>
 
-                        {/* 🔥 ORIGINAL PRICE (LUÔN HIỂN THỊ) */}
+                        {/* ORIGINAL PRICE (LUÔN HIỂN THỊ) */}
                         <div style={row}>
                             <Text type="secondary">Original Price</Text>
                             <Text>
@@ -97,7 +97,7 @@ const Receipt = ({ bookingData, price, discount = 0 }) => {
                             </Text>
                         </div>
 
-                        {/* 🔥 DISCOUNT (CHỈ HIỆN KHI CÓ) */}
+                        {/* DISCOUNT (CHỈ HIỆN KHI CÓ) */}
                         {discountValue > 0 && (
                             <div style={row}>
                                 <Text type="secondary">Discount</Text>
@@ -109,7 +109,7 @@ const Receipt = ({ bookingData, price, discount = 0 }) => {
 
                         <Divider style={{ margin: '12px 0' }} />
 
-                        {/* 🔥 FINAL PRICE */}
+                        {/* FINAL PRICE */}
                         <div style={row}>
                             <Text strong style={{ fontSize: 18 }}>
                                 Total Amount

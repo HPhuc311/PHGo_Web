@@ -31,7 +31,7 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
         ) + 1
     )
 
-    // 👉 chỉ hiển thị base price (KHÔNG tính discount ở FE)
+    // chỉ hiển thị base price (KHÔNG tính discount ở FE)
     const totalPrice = pricePerDay * totalDays
 
     // ================= ADD CARD =================
@@ -101,7 +101,7 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
         try {
             setLoading(true)
 
-            // 👉 chỉ gửi coupon + card lên backend
+            // chỉ gửi coupon + card lên backend
             await onConfirm(selectedCard, coupon)
 
         } catch (err) {
@@ -155,7 +155,7 @@ const PaymentSection = ({ bookingData, onConfirm, onBack, bookingError }) => {
     return (
         <Card title="Payment">
 
-            {/* 👉 HIỂN THỊ GIÁ GỐC */}
+            {/* HIỂN THỊ GIÁ GỐC */}
             <div style={{ marginTop: 10 }}>
 
                 {/* SUBTOTAL */}

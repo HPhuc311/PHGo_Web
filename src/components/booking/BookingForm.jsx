@@ -42,10 +42,10 @@ const BookingForm = ({ onNext, car }) => {
     const disabledDate = (current) => {
         if (!current) return false
 
-        // ❌ past
+        // past
         if (current < dayjs().startOf('day')) return true
 
-        // ❌ booked range
+        // booked range
         return bookedDates.some(trip => {
             const start = dayjs(trip.startTime).startOf('day')
             const end = dayjs(trip.endTime).endOf('day')
