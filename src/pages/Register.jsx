@@ -27,8 +27,12 @@ const Register = () => {
                     label="Full Name"
                     name="name"
                     rules={[
-                        { required: true, message: "Name is required" },
-                        { min: 2, message: "Name must be at least 2 characters" }
+                        { required: true, message: "Full Name is required" },
+                        { min: 2, max: 100, message: "Full name must be between 2 and 100 characters" },
+                        {
+                            pattern: /^[^\d]+$/,
+                            message: "Full name must not contain numbers"
+                        }
                     ]}
                 >
                     <Input placeholder="Enter your name" />
@@ -51,14 +55,42 @@ const Register = () => {
                     label="Phone"
                     name="phone"
                     rules={[
-                        { required: true, message: "Phone is required" },
+                        { required: true, message: "Phone number is required" },
                         {
-                            pattern: /^(0|\+84)[0-9]{9}$/,
-                            message: "Invalid Vietnamese phone number"
+                            pattern: /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/,
+                            message: "Invalid phone number"
                         }
                     ]}
                 >
-                    <Input placeholder="Enter your phone" />
+                    <Input
+                        placeholder="Enter your phone number"
+                        inputMode="numeric"
+                        onKeyPress={(e) => {
+                            // Chỉ cho nhập số và dấu +
+                            if (!/[0-9+]/.test(e.key)) {
+                                e.preventDefault();
+                            }
+                        }}
+                        onChange={(e) => {
+                            // Xử lý paste hoặc nhập sai
+                            let value = e.target.value;
+
+                            // Chỉ giữ số và dấu +
+                            value = value.replace(/[^0-9+]/g, "");
+
+                            // Không cho nhiều dấu +
+                            if ((value.match(/\+/g) || []).length > 1) {
+                                value = value.replace(/\+/g, "");
+                            }
+
+                            // + chỉ được ở đầu
+                            if (value.includes("+") && !value.startsWith("+")) {
+                                value = value.replace(/\+/g, "");
+                            }
+
+                            e.target.value = value;
+                        }}
+                    />
                 </Form.Item>
 
                 {/* PASSWORD */}
